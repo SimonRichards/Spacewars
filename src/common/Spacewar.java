@@ -1,7 +1,7 @@
 /**
  * A simple version of the classic Spacewar! game.
  */
-package spacewar;
+package common;
 
 import javax.swing.*;        
 import java.awt.*;

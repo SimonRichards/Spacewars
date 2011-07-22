@@ -1,4 +1,4 @@
-package spacewar;
+package common;
 
 import javax.vecmath.Vector2d;
 import java.awt.Dimension;
