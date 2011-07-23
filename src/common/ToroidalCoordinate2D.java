@@ -7,7 +7,7 @@ import java.awt.Dimension;
 /**
  * Models a toroidal space for objects to move in.
  */
-class ToroidalCoordinate2D {
+public class ToroidalCoordinate2D {
 
     // Default values/
     private static final Vector2d DEFAULT_POS = new Vector2d(0.0, 0.0);

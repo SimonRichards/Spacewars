@@ -1,16 +1,21 @@
 package client;
 
 import client.InputHandler.SpacecraftController;
+import common.Actor;
 import common.Spacecraft;
 import common.Star;
+import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import javax.swing.JFrame;
 import javax.swing.Timer;
 import javax.vecmath.Vector2d;
 
@@ -18,20 +23,45 @@ import javax.vecmath.Vector2d;
  *
  * @author Simon
  */
-public class Display {
+public class Display extends Canvas{
     private BufferedImage offscreen; // Used to construct game view
     private Graphics2D offgraphics;  // Used to construct game view
     private Timer timer;             // Game update timer
 
     // Tracks all objects currently in the game-space.
-    private ArrayList<SpacewarObject> objects = new ArrayList<SpacewarObject>();
+    private ArrayList<Actor> objects = new ArrayList<Actor>();
         
     private static final double FRAME_RATE = 24.0; // Frames per second
     /**
      * Create a new Spacewar game-space of the specified size.
      * @param size the size of the game
      */
-    public SpacewarGame(Dimension size) {
+    public Display(Dimension size) {
+        
+        
+        // Create and set up the window.
+        JFrame frame = new JFrame(appName);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        // Specify the size
+        frame.setSize(appSize);
+    
+        // Add the game (make it the same size as the window
+        // in this case).
+        final Canvas game = new SpacewarGame(appSize);
+        frame.getContentPane().add(game);
+
+        // Make the game get the focus when the frame is activated.
+        frame.addWindowFocusListener(new WindowAdapter() {
+            public void windowGainedFocus(WindowEvent e) {
+                game.requestFocusInWindow();
+            }
+        });
+
+        // Display the window.
+        frame.pack();
+        frame.setVisible(true);
+        
         setPreferredSize(size);
         setMinimumSize(size);
         setMaximumSize(size);
@@ -45,23 +75,7 @@ public class Display {
         // in a config file (or randomly generated) in a more comprehensive
         // implementation.
 
-        // Central star        
-        this.addObject(new Star(new Vector2d(0.5*size.width, 0.5*size.height),
-                                1000.0));
-     
-        // The initial spacecraft
-        Spacecraft s1 = new Spacecraft.Wedge();
-        s1.setGame(this);
-        s1.setPosition(new Vector2d(20.0, 20.0));
-        s1.setVelocity(new Vector2d(-1.0, 0));    
-        this.addObject(s1);
-        
-
-        Spacecraft s2 = new Spacecraft.Needle();
-        s2.setGame(this);
-        s2.setPosition(new Vector2d(400.0, 400.0));
-        s2.setVelocity(new Vector2d(1.0, -1.0));
-        this.addObject(s2);     
+   
         
         // Set up keyboard control
         this.addKeyListener(new SpacecraftController(s1, 
@@ -95,7 +109,7 @@ public class Display {
         offgraphics.fillRect(0, 0, getSize().width, getSize().height); 
         
         // Render objects
-        for (SpacewarObject obj : objects) {
+        for (Actor obj : objects) {
             obj.draw(offgraphics);
         }
         

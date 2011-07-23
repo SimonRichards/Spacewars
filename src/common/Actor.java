@@ -12,7 +12,7 @@ import java.awt.geom.Rectangle2D;
  * a position, velocity, heading angle, and a "gravity constant" that
  * acts as a proxy for mass.
  */
-abstract class SpacewarObject {
+public abstract class Actor {
 
     // Maximum size of an onscreen object
     private static final int SPRITE_DIM = 20; 
@@ -49,7 +49,7 @@ abstract class SpacewarObject {
     /**
      * Creates an object at the default position and velocity
      */
-    public SpacewarObject() {
+    public Actor() {
         this(DEFAULT_P, DEFAULT_V);
     }
     
@@ -58,7 +58,7 @@ abstract class SpacewarObject {
      * @param initPos the object position
      * @param initV the object velocity
      */
-    public SpacewarObject(Vector2d initPos, Vector2d initV) {
+    public Actor(Vector2d initPos, Vector2d initV) {
         position = new ToroidalCoordinate2D(initPos);
         velocity = new Vector2d(initV);
         
@@ -187,7 +187,7 @@ abstract class SpacewarObject {
      *
      * @param other the other object
      */
-    public void gravitate(SpacewarObject other) {
+    public void gravitate(Actor other) {
         // Find the spatial vector between this and the other object
         Vector2d grav_vector = this.getPosition();
         grav_vector.sub(other.getPosition());
@@ -217,7 +217,7 @@ abstract class SpacewarObject {
      * @param other the other object
      * @return true if a collision has occurred with the other object
      */
-    public boolean hasCollidedWith(SpacewarObject other) {
+    public boolean hasCollidedWith(Actor other) {
         return this.getBoundingBox().intersects(other.getBoundingBox()); 
     }
     

@@ -7,7 +7,7 @@ import javax.vecmath.Vector2d;
  * A star is a large gravitating object that twinkles. Stars cannot be
  * damaged, destroyed, or moved.
  */
-public class Star extends SpacewarObject {
+public class Star extends Actor {
     
     private static final double DEFAULT_G = 1000.0;
         

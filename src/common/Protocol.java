@@ -1,13 +1,11 @@
 package common;
 
-import java.awt.geom.Path2D;
-
 /**
  *
  * @author Simon
  */
 public abstract class Protocol {
-    public static class Client {
+    public static class Client extends Protocol {
 
         public Client() {
         }
@@ -16,7 +14,7 @@ public abstract class Protocol {
     }
     
     
-    public static class Server {
+    public static class Server extends Protocol{
 
         public Server() {
         }

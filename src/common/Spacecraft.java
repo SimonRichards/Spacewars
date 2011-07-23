@@ -7,7 +7,7 @@ import javax.vecmath.Vector2d;
  * A spacecraft is the game player's representative in the game space.
  * Spacecraft are able to maneuver and shoot at each other.
  */
-public class Spacecraft extends SpacewarObject {
+public class Spacecraft extends Actor {
 
     // delta-V provided by one thrust command
     private static final double IMPULSE = 2.0; 
@@ -16,7 +16,6 @@ public class Spacecraft extends SpacewarObject {
     private static final double TURN_INCREMENT = 0.1;
     
     private int shields = 4;   // Number of hits the spacecraft can take
-    private SpacewarGame game; // Containing game-space. 
 
     /**
      * Create a new spacecraft with default position and velocity.
@@ -67,24 +66,12 @@ public class Spacecraft extends SpacewarObject {
         rotate(-TURN_INCREMENT);
     }
     
-    /**
-     * Define the game-space in which the spacecraft is currently
-     * contained.
-     * @param game the containing game-space
-     */
-    public void setGame(SpacewarGame game) {
-        this.game = game;
-    }
-    
     /** 
      * Launch a missile
+     * @return The new missile object
      */
-    public void fire() {
-        if (game != null) {
-            game.addObject(new Missile(this.getPosition(), 
-                                       this.getVelocity(), 
-                                       this.getHeading()));
-        }
+    public Missile fire() { //TODO, make this return the projectile object rather than adding it directly
+        return new Missile(getPosition(), getVelocity(), getHeading());
     }
     
     /**

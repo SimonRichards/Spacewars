@@ -1,18 +1,13 @@
 package server;
 
 import client.Client;
-import common.SpacewarGame;
-import java.awt.Canvas;
 import java.awt.Dimension;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-import javax.swing.JFrame;
 
 /**
  *
@@ -48,7 +43,7 @@ public class Server implements Runnable{
 				new InputStreamReader(
 				clientSocket.getInputStream()));
         String inputLine, outputLine;
-
+/*
         outputLine = kkp.processInput(null);
         out.println(outputLine);
 
@@ -57,7 +52,7 @@ public class Server implements Runnable{
              out.println(outputLine);
              if (outputLine.equals("Bye."))
                 break;
-        }
+        }*/
         out.close();
         in.close();
         clientSocket.close();
@@ -71,28 +66,6 @@ public class Server implements Runnable{
     @Override
     public void run() {
         
-        // Create and set up the window.
-        JFrame frame = new JFrame(appName);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-        // Specify the size
-        frame.setSize(appSize);
-    
-        // Add the game (make it the same size as the window
-        // in this case).
-        final Canvas game = new SpacewarGame(appSize);
-        frame.getContentPane().add(game);
-
-        // Make the game get the focus when the frame is activated.
-        frame.addWindowFocusListener(new WindowAdapter() {
-            public void windowGainedFocus(WindowEvent e) {
-                game.requestFocusInWindow();
-            }
-        });
-
-        // Display the window.
-        frame.pack();
-        frame.setVisible(true);
     }
     
     

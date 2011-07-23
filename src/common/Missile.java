@@ -10,7 +10,7 @@ import javax.vecmath.Vector2d;
  * distance from the launching spacecraft, to prevent them from killing their
  * launcher. Each missile has a finite lifetime, after which it destroys itself.
  */
-public class Missile extends SpacewarObject {
+public class Missile extends Actor {
 
     // Missiles are just drawn as simple boxes at the moment.
     private static Polygon shape = new Polygon(new int[] {8, 12, 12, 8},
