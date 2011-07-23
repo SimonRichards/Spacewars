@@ -24,6 +24,8 @@ public class Display extends Canvas{
     private BufferedImage offscreen; // Used to construct game view
     private Graphics2D offgraphics;  // Used to construct game view
     private Timer timer;             // Game update timer
+    private static final String appName = "Spacewar(s)!";
+    private static final Dimension appSize = new Dimension(500, 500);
 
     // Tracks all objects currently in the game-space.
     private ArrayList<Actor> objects = new ArrayList<Actor>();
@@ -43,15 +45,10 @@ public class Display extends Canvas{
         // Specify the size
         frame.setSize(appSize);
     
-        // Add the game (make it the same size as the window
-        // in this case).
-        final Canvas game = new SpacewarGame(appSize);
-        frame.getContentPane().add(game);
-
         // Make the game get the focus when the frame is activated.
         frame.addWindowFocusListener(new WindowAdapter() {
             public void windowGainedFocus(WindowEvent e) {
-                game.requestFocusInWindow();
+                requestFocusInWindow();
             }
         });
 
@@ -73,7 +70,7 @@ public class Display extends Canvas{
         // implementation.
 
    
-        
+        /*
         // Set up keyboard control
         this.addKeyListener(new SpacecraftController(s1, 
                                 KeyEvent.VK_A, KeyEvent.VK_D, 
@@ -81,7 +78,7 @@ public class Display extends Canvas{
         this.addKeyListener(new SpacecraftController(s2, 
                                 KeyEvent.VK_J, KeyEvent.VK_L, 
                                 KeyEvent.VK_K, KeyEvent.VK_I));  
-                                
+                                */
         // Set up timer to drive animation events.
         int milliseconds_per_frame = (int)(1000.0/FRAME_RATE);
         timer = new Timer(milliseconds_per_frame, (ActionListener)this);

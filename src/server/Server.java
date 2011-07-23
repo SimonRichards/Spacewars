@@ -17,8 +17,6 @@ public class Server implements Runnable{
 
     private static int DEFAULT_PORT = 1989;
     
-    private static final String appName = "Spacewar(s)!";
-    private static final Dimension appSize = new Dimension(500, 500);
     
     /**
      * Creates a new server on the specified port
