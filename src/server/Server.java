@@ -6,8 +6,12 @@ import java.awt.Canvas;
 import java.awt.Dimension;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.ServerSocket;
+import java.net.Socket;
 import javax.swing.JFrame;
 
 /**
@@ -21,11 +25,16 @@ public class Server implements Runnable{
     private static final String appName = "Spacewar(s)!";
     private static final Dimension appSize = new Dimension(500, 500);
     
+    /**
+     * Creates a new server on the specified port
+     * @param port Socket number to use
+     * @throws IOException if the Server cannot be created
+     */
     public Server(int port) throws IOException{
         ServerSocket serverSocket = new ServerSocket(port);
         System.out.println(serverSocket.getInetAddress().getCanonicalHostName());
         
-        /*
+        
         Socket clientSocket = null;
         try {
             clientSocket = serverSocket.accept();
@@ -39,7 +48,6 @@ public class Server implements Runnable{
 				new InputStreamReader(
 				clientSocket.getInputStream()));
         String inputLine, outputLine;
-        KnockKnockProtocol kkp = new KnockKnockProtocol();
 
         outputLine = kkp.processInput(null);
         out.println(outputLine);
@@ -53,11 +61,13 @@ public class Server implements Runnable{
         out.close();
         in.close();
         clientSocket.close();
-        serverSocket.close();*/
+        serverSocket.close();
     }
     
     
-    
+    /**
+     * Main loop for the server
+     */
     @Override
     public void run() {
         
@@ -85,6 +95,11 @@ public class Server implements Runnable{
         frame.setVisible(true);
     }
     
+    
+    /**
+     * Program entry point
+     * @param args 
+     */
     public static void main(String[] args) {
         int port = DEFAULT_PORT;
         try {
@@ -92,7 +107,8 @@ public class Server implements Runnable{
                 port = Integer.decode(args[0]);
             }
         } catch (NumberFormatException e) {
-                System.err.println("Please enter a valid integer");
+            System.err.println("Please enter a valid integer");
+            System.exit(-1);
         }
         try {
             Server server = new Server(port);
@@ -102,9 +118,11 @@ public class Server implements Runnable{
             switch(args.length) {
                 case 0:
                     System.err.println(e.getMessage() + "\nCould not bind to default port: 1989. Please try specifying one");
+                    System.exit(-1);
                     break;
                 default:
                     System.err.println("Could not bind to specified port");
+                    System.exit(-1);
                     break;                    
             }
         }
