@@ -110,14 +110,12 @@ public class Spacecraft extends Actor {
      * lightweight implementation of the Command pattern.
      */
     public static enum Command { 
-        COUNTER_CLOCKWISE { void execute(Spacecraft sc){ 
-                                sc.counterClockwise();
-                            } }, 
-        CLOCKWISE { void execute(Spacecraft sc){ sc.clockwise();} }, 
-        THRUST { void execute(Spacecraft sc){ sc.thrust();} },
-        FIRE { void execute(Spacecraft sc){ sc.fire();} };
+        COUNTER_CLOCKWISE { public void execute(Spacecraft sc){ sc.counterClockwise();} }, 
+        CLOCKWISE { public void execute(Spacecraft sc){ sc.clockwise();} }, 
+        THRUST { public void execute(Spacecraft sc){ sc.thrust();} },
+        FIRE { public void execute(Spacecraft sc){ sc.fire();} };
 
-        abstract void execute(Spacecraft sc);
+        public abstract void execute(Spacecraft sc);
     };    
 }
 

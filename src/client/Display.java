@@ -2,8 +2,6 @@ package client;
 
 import client.InputHandler.SpacecraftController;
 import common.Actor;
-import common.Spacecraft;
-import common.Star;
 import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -17,7 +15,6 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import javax.swing.JFrame;
 import javax.swing.Timer;
-import javax.vecmath.Vector2d;
 
 /**
  *
