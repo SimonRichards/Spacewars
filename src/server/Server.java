@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -87,7 +89,6 @@ public class Server implements Runnable{
         }
         try {
             new Thread(new Server(port)).start();
-            new Thread(new Client(port)).start();
         } catch (IOException e) { 
             switch(args.length) {
                 case 0:
@@ -100,5 +101,11 @@ public class Server implements Runnable{
                     break;                    
             }
         }
+        try {
+            new Thread(new Client(port)).start();
+        } catch (IOException ex) {
+            System.err.println("Could not connect to local server");
+        }
+        
     }
 }

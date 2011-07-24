@@ -4,37 +4,29 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.net.Inet4Address;
-import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import server.Server;
+import java.util.Collection;
 
 /**
  *
  * @author Simon
  */
 public class Client implements Runnable{
-    private Server localServer;
+    private Socket localServer;
+    private Socket currentServer;
+    private Collection<Socket> serverList;
     
-    public Client(int port) {
-        //this.localServer = localServer;
-        Socket socket = null;
-        PrintWriter out = null;
-        BufferedReader in = null;
+    PrintWriter out;
+    BufferedReader in;
+    
+    public Client(int port) throws IOException {
 
         System.out.println("trying to connect to local server");
-        try {
-            socket = new Socket("192.168.1.100", port);
-            out = new PrintWriter(socket.getOutputStream(), true);
-            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        } catch (UnknownHostException e) {
-            System.err.println("Don't know about host: localhost.");
-            System.exit(1);
-        } catch (IOException e) {
-            System.err.println("Couldn't get I/O for the connection to localhost.");
-            System.exit(1);
-        }
+        localServer = new Socket("127.0.0.1", port);
+        out = new PrintWriter(localServer.getOutputStream(), true);
+        in = new BufferedReader(new InputStreamReader(localServer.getInputStream()));
+        
 
         BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
         String fromServer;
@@ -64,6 +56,4 @@ public class Client implements Runnable{
     public void run() {
         
     }
-    
-    
 }
