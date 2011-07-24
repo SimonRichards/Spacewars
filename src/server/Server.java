@@ -1,11 +1,8 @@
 package server;
 
 import client.Client;
-import java.awt.Dimension;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -15,7 +12,19 @@ import java.net.Socket;
  */
 public class Server implements Runnable{
 
-    private static int DEFAULT_PORT = 1989;
+    private static int DEFAULT_PORT = 2001;
+    private InetAddress address;
+    private ServerSocket serverSocket;
+    
+    
+    private static void print(Object o) {
+        System.out.println(o);
+    }
+
+    public InetAddress getAddress() {
+        return address;
+    }
+    
     
     
     /**
@@ -24,9 +33,17 @@ public class Server implements Runnable{
      * @throws IOException if the Server cannot be created
      */
     public Server(int port) throws IOException{
-        ServerSocket serverSocket = new ServerSocket(port);
-        System.out.println(serverSocket.getInetAddress().getCanonicalHostName());
-        
+        serverSocket = new ServerSocket(port);
+    }
+    
+    
+    /**
+     * Main loop for the server
+     */
+    @Override
+    public void run() {
+        //address = serverSocket.getInetAddress();
+        print("waiting for client");
         
         Socket clientSocket = null;
         try {
@@ -35,12 +52,14 @@ public class Server implements Runnable{
             System.err.println("Accept failed.");
             System.exit(1);
         }
-
+        
+        print("client connected");
+        /*
         PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
         BufferedReader in = new BufferedReader(
 				new InputStreamReader(
 				clientSocket.getInputStream()));
-        String inputLine, outputLine;
+        String inputLine, outputLine;*/
 /*
         outputLine = kkp.processInput(null);
         out.println(outputLine);
@@ -50,20 +69,11 @@ public class Server implements Runnable{
              out.println(outputLine);
              if (outputLine.equals("Bye."))
                 break;
-        }*/
+        }*//*
         out.close();
         in.close();
         clientSocket.close();
-        serverSocket.close();
-    }
-    
-    
-    /**
-     * Main loop for the server
-     */
-    @Override
-    public void run() {
-        
+        serverSocket.close();*/
     }
     
     
@@ -82,9 +92,8 @@ public class Server implements Runnable{
             System.exit(-1);
         }
         try {
-            Server server = new Server(port);
             new Thread(new Server(port)).start();
-            new Thread(new Client(port, server)).start();
+            new Thread(new Client(port)).start();
         } catch (IOException e) { 
             switch(args.length) {
                 case 0:
