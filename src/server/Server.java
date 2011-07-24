@@ -13,7 +13,6 @@ import java.net.Socket;
 public class Server implements Runnable{
 
     private static int DEFAULT_PORT = 2001;
-    private InetAddress address;
     private ServerSocket serverSocket;
     
     
@@ -21,11 +20,6 @@ public class Server implements Runnable{
         System.out.println(o);
     }
 
-    public InetAddress getAddress() {
-        return address;
-    }
-    
-    
     
     /**
      * Creates a new server on the specified port

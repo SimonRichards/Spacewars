@@ -23,7 +23,7 @@ public class Client implements Runnable{
         PrintWriter out = null;
         BufferedReader in = null;
 
-        System.out.println("trying to connect to server");
+        System.out.println("trying to connect to local server");
         try {
             socket = new Socket("192.168.1.100", port);
             out = new PrintWriter(socket.getOutputStream(), true);
@@ -32,10 +32,9 @@ public class Client implements Runnable{
             System.err.println("Don't know about host: localhost.");
             System.exit(1);
         } catch (IOException e) {
-            System.err.println("Couldn't get I/O for the connection to.");
+            System.err.println("Couldn't get I/O for the connection to localhost.");
             System.exit(1);
         }
-        System.out.println("blah");
 
         BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
         String fromServer;
