@@ -6,6 +6,8 @@ import java.awt.Dimension;
 
 /**
  * Models a toroidal space for objects to move in.
+ * 
+ * @author Simon, Daniel, AIM
  */
 public class ToroidalCoordinate2D {
 

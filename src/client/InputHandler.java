@@ -1,69 +1,54 @@
 package client;
 
-import common.Spacecraft;
+import common.Command;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  *
- * @author Simon
+ * @author Simon, Daniel
  */
-public class InputHandler {
+public class InputHandler extends KeyAdapter {
+    private final Map<Integer,Command> commandFromKey;
+    private final EnumSet<Command> commands;
+
+    public InputHandler() {
+        commandFromKey = new HashMap<Integer,Command>(Command.values().length, 1.0f);
+        commandFromKey.put(KeyEvent.VK_W, Command.FIRE);
+        commandFromKey.put(KeyEvent.VK_S, Command.FORWARD);
+        commandFromKey.put(KeyEvent.VK_A, Command.TURN_CCW);
+        commandFromKey.put(KeyEvent.VK_D, Command.TURN_CW);
+        commandFromKey.put(KeyEvent.VK_ESCAPE, Command.EXIT);
+        commandFromKey.put(KeyEvent.VK_SPACE, Command.HYPERSPACE);
+        commands = EnumSet.noneOf(Command.class);
+    }
+
+    public synchronized EnumSet<Command> read() {
+        return commands.clone();
+    }
+
     /**
-     * Nested class define a reusable keyboard controller for
-     * a spacecraft. Essentially provides a mapping between
-     * key-presses and spacecraft commands.
+     * Accepts a keypress event and executes the corresponding command
+     * on the controlled spacecraft.
+     * @param k the pressed key
      */
-    class SpacecraftController extends KeyAdapter {
-        private Spacecraft sc; // Spacecraft being controlled
-        
-        // Defines the relationship between keys and spacecraft commands
-        private Map<Integer,Spacecraft.Command> commandFromKey = 
-            new HashMap<Integer,Spacecraft.Command>();
-        
-        /**
-         * Create a new controller for the given spacecraft. The controller
-         * will translate each of the specified keys into the corresponding
-         * command.
-         *
-         * Example: new SpacecraftController(s,
-         *                       KeyEvent.VK_A, KeyEvent.VK_D, 
-         *                       KeyEvent.VK_S, KeyEvent.VK_W)
-         *
-         * Sets up a controller for spacecraft s using keys 'A', 'D'
-         * 'S', and 'W'.
-         *
-         * @param spacecraft the spacecraft to control
-         * @param counterClockwise key to rotate spacecraft left
-         * @param clockwise key to rotate spacecraft right
-         * @param thrust key to fire spacecraft thrusters
-         * @param fire key to fire spacecraft weapons
-         */
-        public SpacecraftController(Spacecraft spacecraft,
-                                    Integer counterClockwise, 
-                                    Integer clockwise, 
-                                    Integer thrust,
-                                    Integer fire) {
-            this.sc = spacecraft;
-            commandFromKey.put(counterClockwise,
-                Spacecraft.Command.COUNTER_CLOCKWISE);
-            commandFromKey.put(clockwise, Spacecraft.Command.CLOCKWISE);
-            commandFromKey.put(thrust, Spacecraft.Command.THRUST);
-            commandFromKey.put(fire, Spacecraft.Command.FIRE);            
+    public synchronized void keyPressed(KeyEvent k) {
+        if (commandFromKey.containsKey(k.getKeyCode())) {
+            commands.add(commandFromKey.get(k.getKeyCode()));
         }
-        
-        /**
-         * Accepts a keypress event and executes the corresponding command
-         * on the controlled spacecraft.
-         * @param k the pressed key
-         */
-        public void keyPressed(KeyEvent k) {
-            Spacecraft.Command c = commandFromKey.get(k.getKeyCode());
-            if (c != null && !sc.isDead()) {
-                c.execute(sc);
-            }
-        }  
-    }    
+    }
+
+    @Override
+    public void keyReleased(KeyEvent k) {
+        if (commandFromKey.containsKey(k.getKeyCode())) {
+            commands.remove(commandFromKey.get(k.getKeyCode()));
+        }
+    }
+
+
+
+
 }
