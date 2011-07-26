@@ -18,17 +18,21 @@ public abstract class Spacecraft extends Actor {
     // Change in orientation provided by one rotate command
     private static final double TURN_INCREMENT = 0.1;
 
-    private int cooldown;
-    private static final int COOLDOWN_TIME = 3;
+    private int timeTillCool;
+    private static final int COOLDOWN_TIME = 9;
 
     private int shields = 4;   // Number of hits the spacecraft can take
 
     public boolean isCooledDown() {
-        return cooldown == 0;
+        return timeTillCool == 0;
     }
 
-    public void setCooldown(int cooldown) {
-        this.cooldown = cooldown;
+    public void setHot() {
+        timeTillCool = COOLDOWN_TIME;
+    }
+
+    private void coolDown(){
+        timeTillCool--;
     }
 
     /**
@@ -36,13 +40,21 @@ public abstract class Spacecraft extends Actor {
      * @return The new missile object
      */
     public Missile fire() {
-//        if(isCooledDown())
-        Vector2d vel = new Vector2d(getVelocity());
-        return new Missile(getPosition(), vel, getHeading());
+        Missile missle = null;
+        if(isCooledDown()){
+            Vector2d vel = new Vector2d(getVelocity());
+            missle = new Missile(getPosition(), vel, getHeading());
+            setHot();
+        }
+        else{
+            coolDown();
+        }
+        return missle;
     }
 
     Spacecraft(String stream) {
         super(stream);
+        timeTillCool = 0;
     }
 
     /**
@@ -52,6 +64,7 @@ public abstract class Spacecraft extends Actor {
      */
     public Spacecraft(Vector2d pos, Vector2d vel, int colourInt) {
         super(pos, vel, colourInt);
+        timeTillCool = 0;
     }
 
     /**

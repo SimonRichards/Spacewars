@@ -4,6 +4,7 @@ import common.Actor;
 import common.Command;
 import common.Connection;
 import common.Game;
+import common.Missile;
 import common.Spacecraft;
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -72,7 +73,7 @@ public class Server extends TimerTask {
             if (spacecraft != null) {
                 try {
                     String clientOutput;
-                    while ((clientOutput = client.readln()) != null)  {
+                    while ((clientOutput = client.readln()) != null) {
                         Command input = Command.fromInt(Integer.valueOf(clientOutput));
                         switch (input) {
                             case EXIT:
@@ -129,7 +130,10 @@ public class Server extends TimerTask {
                 break;
             case FIRE:
                 if (!spacecraft.isDead()) {
-                    engine.actors.add(spacecraft.fire());
+                    Missile missle = spacecraft.fire();
+                    if (missle != null) {
+                        engine.actors.add(missle);
+                    }
                 }
                 break;
             default:
@@ -162,7 +166,7 @@ public class Server extends TimerTask {
         clientBuffer.add(client);
     }
 
-    private void addActorfromClient(Connection.Client client) { 
+    private void addActorfromClient(Connection.Client client) {
         spacecraftFromClient.put(client, engine.addSpaceship(141)); //TODO: get colourInt from client
     }
 
