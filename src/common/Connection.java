@@ -100,7 +100,7 @@ public abstract class Connection {
             out = new PrintWriter(socket.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             stream = socket.getInputStream();
-            socket.setSoTimeout(500);
+            socket.setSoTimeout(1000);
         }
 
         public int getNumActors() throws IOException {
@@ -112,8 +112,9 @@ public abstract class Connection {
         }
 
 
-        public boolean is(InetAddress address) {
-            return address.equals(socket.getInetAddress());
+        public boolean is(InetAddress address, int port) {
+            return address.getHostAddress().equals(socket.getInetAddress().getHostAddress()) &&
+                    socket.getPort() == port;
         }
     }
 }

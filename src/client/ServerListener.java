@@ -6,8 +6,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.util.HashMap;
-import java.util.Map;
+import java.net.MulticastSocket;
 
 /**
  *
@@ -16,32 +15,39 @@ import java.util.Map;
 public class ServerListener implements Runnable{
 
     private final Client client;
-    public ServerListener(Client client) {
+    private final MulticastSocket multiSocket;
+
+    public ServerListener(Client client) throws IOException {
         this.client = client;
+        multiSocket = new MulticastSocket(Game.DEFAULT_UDP_PORT);
+        multiSocket.joinGroup(InetAddress.getByName(Game.group));
     }
 
     @Override
     public void run() {
         try {
-            byte[] buffer = new byte[10];
-            DatagramPacket packet = new DatagramPacket(buffer, 10);
-            DatagramSocket socket = new DatagramSocket(Game.DEFAULT_UDP_PORT);
-            while (Game.running) {
-                socket.receive(packet);
-                if (client.numServers() < Game.MAX_SERVERS &&
-                    !client.serverAlreadyConnected(packet.getAddress())) {
-                        client.addServer(new Connection.Server(
+            byte[] buffer = new byte[Game.UDP_PACKET_LENGTH];
+            DatagramPacket packet = new DatagramPacket(buffer, Game.UDP_PACKET_LENGTH);
+            while (true) {
+                multiSocket.receive(packet);
+                    String []data = new String(packet.getData()).split(" ");
+                    String name = data[1].trim().concat("'s server");
+                    int port = Integer.valueOf(data[0]);
+                if (client.numServers() < Game.MAX_SERVERS && // true){
+                    !client.serverAlreadyConnected(packet.getAddress(), port)) {
+
+                    client.addServer(new Connection.Server(
                         packet.getAddress(),
-                        Game.DEFAULT_TCP_PORT,
-                        new String(buffer).trim().concat("'s server")));
+                        port,
+                        name));
                 }
                 for (int i = 0; i < buffer.length; i++) {
                     buffer[i] = 0;
                 }
             }
         } catch (IOException ex) {
-            Game.running = false;
-            System.err.println("Server listener failed");
+            System.err.println(ex.getMessage());
+            System.exit(-20);
         }
     }
 }

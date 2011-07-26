@@ -12,7 +12,7 @@ import javax.vecmath.Vector2d;
  */
 public class Star extends Actor {
 
-    private static final double DEFAULT_G = 1000.0;
+    private static final double DEFAULT_G = 1000000.0;
 
     /**
      * Place a star at the specified location, with a default gravitational

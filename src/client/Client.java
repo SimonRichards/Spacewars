@@ -11,6 +11,9 @@ import java.util.Collection;
 import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.omg.PortableServer.POA;
 
 /**
  *
@@ -24,6 +27,7 @@ public class Client implements Runnable {
     private Display display;
     private Collection<Actor> actors;
     private final Random rand;
+    private final int localPort;
 
     public Client(int port) throws IOException {
         servers = new LinkedList<Connection.Server>();
@@ -33,13 +37,19 @@ public class Client implements Runnable {
         actors = new LinkedList<Actor>();
         rand = new Random();
         display = new Display(Game.appSize, input);
+        localPort = port;
     }
 
     @Override
     public void run() {
-        new Thread(new ServerListener(this)).start();
+        try {
+            new Thread(new ServerListener(this), ServerListener.class.getName()).start();
+        } catch (IOException ex) {
+            System.err.println(ex.getMessage());
+            System.exit(-72);
+        }
 
-        while (Game.running) {
+        while (true) {
             // Retrieve keyboard input
             EnumSet<Command> commands = input.read();
 
@@ -53,8 +63,8 @@ public class Client implements Runnable {
 
             // Exit at user's command
             if (commands.contains(Command.EXIT)) {
-                Game.running = false;
                 currentServer.writeln(Command.EXIT.ordinal());
+                System.exit(0);
                 break;
             }
 
@@ -79,7 +89,7 @@ public class Client implements Runnable {
                 continue;
             } catch (Exception e) {
                 System.err.println(e.getMessage());
-                Game.running = false;
+                System.exit(-12);
                 break;
             }
 
@@ -103,7 +113,7 @@ public class Client implements Runnable {
         }
     }
 
-    private synchronized Connection.Server findNewServer() {//TODO: not synchronised?
+    private Connection.Server findNewServer() {
         int current = servers.indexOf(currentServer);
         int nextInt = -1;
         do {
@@ -125,16 +135,16 @@ public class Client implements Runnable {
         servers.add(server);
     }
 
-    public synchronized boolean serverAlreadyConnected(InetAddress address) { //TODO: not synchronised?
+    public boolean serverAlreadyConnected(InetAddress address, int port) {
         for (Server server : servers) {
-            if (server.is(address)) {
+            if (server.is(address, port)) {
                 return true;
             }
         }
         return false;
     }
 
-    public synchronized int numServers() {//TODO: not synchronised?
+    public int numServers() {
         return servers.size();
     }
 }

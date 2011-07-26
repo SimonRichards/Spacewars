@@ -21,7 +21,7 @@ public class Missile extends Actor {
                                                4);
 
     // The delta-V provided by the missile thruster when it fires
-    private static final double IMPULSE = 4.0;
+    private static final double IMPULSE = 10.0;
     // The distance from the spacecraft the missile has to be before it becomes
     // active
     private static final double IGNITION_DISTANCE = 20.0;
@@ -31,6 +31,8 @@ public class Missile extends Actor {
 
     // Remaining number of time-steps before the missile becomes inactive.
     private int lifetime = INIT_LIFE;
+
+    private static final double DEFAULT_G = 0.001;
 
     /**
      * Launch a missile from a spacecraft with the specified position and
@@ -63,7 +65,7 @@ public class Missile extends Actor {
 
     Missile(String stream) {
         super(stream);
-        spriteGraphics.setColor(Color.getHSBColor(((float)colourInt)/1000, 0.5f, 0.5f));
+        spriteGraphics.setColor(Color.getHSBColor(((float)colourInt)/1000, 1f, 1f));
         spriteGraphics.drawPolygon(shape);
     }
 

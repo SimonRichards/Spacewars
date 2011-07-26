@@ -23,7 +23,7 @@ public abstract class Actor {
     // Default values for position and velocity vectors, heading, and
     // gravity constant
     private static final double DEFAULT_HEADING = Math.toRadians(1.0);
-    private static final double DEFAULT_G = 100.0;
+    private static final double DEFAULT_G = 1.0;
     // Image representing the object on screen, and a graphics context
     // to draw to the image.
     private BufferedImage sprite;

@@ -1,7 +1,7 @@
 package common;
 
 import java.awt.*;
-import java.util.LinkedList;
+import javax.vecmath.Tuple2d;
 import javax.vecmath.Vector2d;
 
 /**
@@ -18,10 +18,28 @@ public abstract class Spacecraft extends Actor {
     // Change in orientation provided by one rotate command
     private static final double TURN_INCREMENT = 0.1;
 
-
+    private int cooldown;
+    private static final int COOLDOWN_TIME = 3;
 
     private int shields = 4;   // Number of hits the spacecraft can take
 
+    public boolean isCooledDown() {
+        return cooldown == 0;
+    }
+
+    public void setCooldown(int cooldown) {
+        this.cooldown = cooldown;
+    }
+
+    /**
+     * Launch a missile
+     * @return The new missile object
+     */
+    public Missile fire() {
+//        if(isCooledDown())
+        Vector2d vel = new Vector2d(getVelocity());
+        return new Missile(getPosition(), vel, getHeading());
+    }
 
     Spacecraft(String stream) {
         super(stream);
@@ -47,7 +65,7 @@ public abstract class Spacecraft extends Actor {
             this.destroy();
         }
     }
-    
+
 
     /**
      * Fire the spacecraft thrusters to provide a change in velocity (delta-V).
@@ -70,13 +88,6 @@ public abstract class Spacecraft extends Actor {
         rotate(-TURN_INCREMENT);
     }
 
-    /**
-     * Launch a missile
-     * @return The new missile object
-     */
-    public Missile fire() { //TODO, make this return the projectile object rather than adding it directly
-        return new Missile(getPosition(), getVelocity(), getHeading());
-    }
 
     /**
      * The Needle is one of the two classic Spacewar spacecraft.

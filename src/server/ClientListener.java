@@ -22,8 +22,7 @@ public class ClientListener implements Runnable {
 
     @Override
     public void run() {
-        while (Game.running) {
-
+        while (true) {
             Socket connection;
             try {
                 connection = socket.accept();
@@ -31,7 +30,7 @@ public class ClientListener implements Runnable {
                 System.out.println("new client connected");
             } catch (IOException ex) {
                 System.err.println("Server socket lost");
-                Game.running = false;
+                System.exit(-13);
             }
         }
     }

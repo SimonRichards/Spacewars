@@ -2,16 +2,17 @@ package server;
 
 import common.Actor;
 import common.Command;
+import common.Spacecraft;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.Random;
+import javax.vecmath.Vector2d;
 
 /**
  *
  * @author Simon
  */
-public class AI {
-    private final Collection<Actor> actors;
+public class AI extends Spacecraft.Needle {
     private final EnumSet<Command> output;
     private final EnumSet<Command> choices;
     private final Random rand;
@@ -21,8 +22,8 @@ public class AI {
     private int counterLength = 0;
 
 
-    public AI(Collection<Actor> actors) {
-        this.actors = actors;
+    public AI(Vector2d pos, Vector2d vel) {
+        super(pos, vel);
         output = EnumSet.noneOf(Command.class);
         choices = EnumSet.of(
                 Command.FORWARD,
@@ -33,7 +34,7 @@ public class AI {
         counterLength = rand.nextInt(MAX_COUNT);
     }
 
-    public EnumSet<Command> update(){
+    public EnumSet<Command> update(Collection<Actor> actors){
         if (counter++ > counterLength) {
             counterLength = rand.nextInt(MAX_COUNT);
             counter = 0;

@@ -34,7 +34,7 @@ public class Server extends TimerTask {
     private static final int MAX_CLIENTS = 10;
     private boolean standalone;
     private boolean firstTime;
-    private final AI ai;
+    private final int port;
 
     /**
      * Creates a new server on the specified port
@@ -48,8 +48,8 @@ public class Server extends TimerTask {
         clients = new LinkedList<Connection.Client>();
         clientBuffer = new ArrayList<Connection.Client>(10);
         spacecraftFromClient = new HashMap<Connection.Client, Spacecraft>(MAX_CLIENTS);
-        ai = new AI(Collections.unmodifiableCollection(engine.actors));
         this.standalone = standalone;
+        this.port = port;
     }
 
     /**
@@ -61,9 +61,10 @@ public class Server extends TimerTask {
         if (!firstTime && !standalone) {
             findLocalClient();
             firstTime = true;
-            UDPBroadcaster.start();
+            UDPBroadcaster.start(port);
             ClientListener.start(this, serverSocket);
         }
+
 
         // Main loop
         for (Connection.Client client : clients) {
@@ -92,7 +93,7 @@ public class Server extends TimerTask {
             }
         }
 
-        for (Command command : ai.update()) {
+        for (Command command : engine.aiActor.update(Collections.unmodifiableCollection(engine.actors))) {
             handleCommand(engine.aiActor, command);
         }
 
@@ -138,7 +139,6 @@ public class Server extends TimerTask {
     }
 
     public void kill() {
-
         // Game over, kill the connection
         for (Connection.Client client : clients) {
             client.close();
@@ -162,8 +162,8 @@ public class Server extends TimerTask {
         clientBuffer.add(client);
     }
 
-    private void addActorfromClient(Connection.Client client) {
-        spacecraftFromClient.put(client, engine.addSpaceship(141)); //TODO get colourInt from client
+    private void addActorfromClient(Connection.Client client) { 
+        spacecraftFromClient.put(client, engine.addSpaceship(141)); //TODO: get colourInt from client
     }
 
     private synchronized void loadNewClients() {

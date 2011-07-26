@@ -20,7 +20,7 @@ import javax.vecmath.Vector2d;
  */
 public class GameEngine {
     ArrayList<Actor> actors;
-    Spacecraft aiActor;
+    AI aiActor;
 
     private Random rand;
 
@@ -41,7 +41,7 @@ public class GameEngine {
         actors.add(s1);
 
 
-        aiActor = new Spacecraft.Needle(new Vector2d(400.0, 400.0),
+        aiActor = new AI(new Vector2d(400.0, 400.0),
                 new Vector2d(1.0, -1.0));
         actors.add(aiActor);
     }
