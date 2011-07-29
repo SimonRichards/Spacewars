@@ -18,10 +18,11 @@ import javax.swing.JFrame;
 import javax.swing.Timer;
 
 /**
+ * A Display will paint a given set of actors and list server names.
  *
  * @author Simon, Daniel
  */
-public class Display extends Canvas {
+class Display extends Canvas {
 
     private BufferedImage offscreen; // Used to construct game view
     private Graphics2D offgraphics;  // Used to construct game view
@@ -30,13 +31,16 @@ public class Display extends Canvas {
     // Tracks all objects currently in the game-space.
     private LinkedList<Actor> actors = new LinkedList<Actor>();
     private LinkedList<String> serverNames = new LinkedList<String> ();
+    private int currentServer = 0;
+    private int selectedServer = 0;
 
     /**
-     * Create a new Spacewar game-space of the specified size.
-     * @param listener
+     * Create a new Display of the given size. Needs to match up to the
+     * game engine's size.
+     * @param listener The input handler that the client is using
      * @param size the size of the game
      */
-    public Display(final Dimension size, final KeyListener listener) {
+    Display(final Dimension size, final KeyListener listener) {
         super();
         setPreferredSize(appSize);
         setMinimumSize(appSize);
@@ -47,6 +51,7 @@ public class Display extends Canvas {
         JFrame frame = new JFrame(appName);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(appSize);
+        frame.setResizable(false);
         frame.addKeyListener(listener);
         this.addKeyListener(listener);
         frame.getContentPane().add(this);
@@ -54,7 +59,11 @@ public class Display extends Canvas {
         frame.setVisible(true);
     }
 
-    public synchronized void loadActors(Collection<Actor> newActors) {
+    /**
+     * Loads a list of actors into the Display's private list for thread safety
+     * @param newActors
+     */
+    synchronized void loadActors(Collection<Actor> newActors) {
         actors.clear();
         actors.addAll(newActors);
     }
@@ -85,6 +94,13 @@ public class Display extends Canvas {
         offgraphics.setColor(Color.RED);
         int i = 0;
         for (String name : serverNames) {
+            if (i == currentServer) {
+                offgraphics.setPaint(Color.RED);
+            } else if (i == selectedServer) {
+                offgraphics.setPaint(Color.YELLOW);
+            } else {
+                offgraphics.setPaint(Color.WHITE);
+            }
             offgraphics.drawString(name, appSize.width - 100, 20*i + 10);
             i++;
         }
@@ -94,11 +110,17 @@ public class Display extends Canvas {
 
     }
 
-    void setServerNames(LinkedList<Server> servers) {
+    /**
+     * Pass in a set of server names which the display will make its own copy of.
+     * @param servers The list of server names
+     * @param current The server to highlight as being the current server
+     * @param selected The server to highlight as being the next hyperspace target
+     */
+    synchronized void setServerNames(Collection<String> servers, int current, int selected) {
+        currentServer = current;
+        selectedServer = selected;
         serverNames.clear();
-        for (Server server : servers) {
-            serverNames.add(server.getName());
-        }
+        serverNames.addAll(servers);
     }
 
 }

@@ -1,30 +1,39 @@
 package common;
 
 import java.awt.*;
-import java.util.LinkedList;
+import java.nio.DoubleBuffer;
 import javax.vecmath.Vector2d;
 
 /**
  * A star is a large gravitating object that twinkles. Stars cannot be
  * damaged, destroyed, or moved.
  *
- * @author Simon, Daniel, AIM
+ * @author AIM, Simon, Daniel
  */
 public class Star extends Actor {
 
     private static final double DEFAULT_G = 1000000.0;
-
+    private static final int STAR_CRASH_EFFECT = 1000;
+    private static Polygon shape = new Polygon(new int[] {10, 20, 11, 10, 9, 0, 10,
+                                                          10, 9, 5, 15, 11, 5, 15},
+                                               new int[] {10, 10, 11, 20, 9, 10, 10,
+                                                          0, 11, 5, 15, 9, 15, 5},
+                                               14);
     /**
      * Place a star at the specified location, with a default gravitational
      * constant.
      * @param pos the location of the star
      */
     public Star(Vector2d pos) {
-        this(pos, DEFAULT_G, 0);
+        this(pos, DEFAULT_G);
     }
 
-    Star(String stream) {
-        super(stream);
+    /**
+     * Rebuilds a star out of transmitted data
+     * @param buffer The data
+     */
+    Star(double[] buffer) {
+        super(0, buffer);
         setSprite();
     }
 
@@ -32,37 +41,44 @@ public class Star extends Actor {
      * Place a star with gravitational constant G at the specified location.
      * @param pos the location of the star
      * @param G the gravitational constant of the star.
-     * @param colourInt The star colour
      */
-    public Star(Vector2d pos, double G, int colourInt) {
-        super(new Vector2d(pos), new Vector2d(1.0, 0.0), colourInt);
+    public Star(Vector2d pos, double G) {
+        super(new Vector2d(pos), new Vector2d(1.0, 0.0));
         this.setGravityConstant(G);
         setSprite();
     }
 
+    /**
+     * Not even possible
+     */
     @Override
     public void destroy() {
         return;
     }
 
-
+    /**
+     * Set's up the star's sprite, for use by constructors
+     */
     private void setSprite() {
         // Define a sprite for the star. This is basically just a whole
         // mess of lines.
-        Polygon shape = new Polygon(new int[] {10, 20, 11, 10, 9, 0, 10,
-                                               10, 9, 5, 15, 11, 5, 15},
-                                    new int[] {10, 10, 11, 20, 9, 10, 10,
-                                               0, 11, 5, 15, 9, 15, 5},
-                                    14);
         spriteGraphics.setColor(Color.WHITE);
         spriteGraphics.drawPolygon(shape);
     }
 
+    /**
+     * This method is ignored, stars are immutable
+     * @param damageTaken ignored
+     */
     @Override
-    public void damage() {
+    public void damage(int damageTaken) {
         return;
     }
 
+    /**
+     * @inheritDoc
+     * Used for animation purposes only
+     */
     @Override
     public void stepTime() {
         // Even though ships are defined as having effectively zero mass,
@@ -77,11 +93,20 @@ public class Star extends Actor {
     }
 
 
-
+    /**
+     * @return ActorType.STAR's ordinal value
+     */
     @Override
-    public int getID() {
+    public int getActorType() {
         return ActorType.STAR.ordinal();
     }
 
+    /**
+     * @return a Very Large number
+     */
+    @Override
+    public int getCollisionDamage() {
+        return STAR_CRASH_EFFECT;
+    }
 }
 

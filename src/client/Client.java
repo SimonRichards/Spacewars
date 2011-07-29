@@ -1,150 +1,156 @@
 package client;
 
 import common.Actor;
+import common.Actor.ActorType;
 import common.Command;
 import common.Connection;
 import common.Connection.Server;
 import common.Game;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.util.Collection;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Random;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.omg.PortableServer.POA;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- *
+ * A client object bundles the user interface (display and input) along with
+ * a ServerManager object to track all servers that the client is connected to.
  * @author Simon, Daniel
  */
 public class Client implements Runnable {
-
-    private Connection.Server currentServer;
-    private LinkedList<Connection.Server> servers;
     private final InputHandler input;
     private Display display;
-    private Collection<Actor> actors;
-    private final Random rand;
-    private final int localPort;
+    private Map<Integer, Actor> currentActors;
+    private Map<Integer, Actor> nextActors;
+    private double[] actorBuffer;
+    private final int id;
+    private int hyperCoolDown;
+    private final int hyperPeriod = 5;
+    private final ServerManager serverManager;
 
-    public Client(int port) throws IOException {
-        servers = new LinkedList<Connection.Server>();
-        currentServer = new Connection.Server(InetAddress.getLocalHost(), port, "Local server");
-        servers.add(currentServer);
-        input = new InputHandler();
-        actors = new LinkedList<Actor>();
-        rand = new Random();
-        display = new Display(Game.appSize, input);
-        localPort = port;
+    /**
+     * Starts up a client in its own thread, blocks until server is found
+     * @param tcpPort The port on which to connect to the local server
+     * @throws IOException If the local server cannot be found
+     */
+    public static void start(int tcpPort) throws IOException{
+        new Thread(new Client(tcpPort)).start();
     }
 
+    /**
+     * Creates a new Client which blocks until the local
+     * server is found.
+     *
+     * @param port The TCP/IP port to find the local server on
+     * @throws IOException if there is an error in the TCP protocol
+     */
+    private Client(int port) throws IOException {
+        id = new Random().nextInt();
+        serverManager = new ServerManager(port, id);
+        serverManager.start();
+        input = new InputHandler();
+        currentActors = new HashMap<Integer, Actor>(50);
+        nextActors = new HashMap<Integer, Actor>(50);
+        display = new Display(Game.appSize, input);
+        actorBuffer = new double[Actor.NUM_ELEMENTS];
+    }
+
+    /**
+     * The client side of the main game loop
+     */
     @Override
     public void run() {
-        try {
-            new Thread(new ServerListener(this), ServerListener.class.getName()).start();
-        } catch (IOException ex) {
-            System.err.println(ex.getMessage());
-            System.exit(-72);
-        }
-
         while (true) {
             // Retrieve keyboard input
             EnumSet<Command> commands = input.read();
 
-            // Check for hyperspace
-            if (commands.contains(Command.HYPERSPACE)) {
-                currentServer.writeln(Command.EXIT.ordinal());
-                currentServer = findNewServer();
-                currentServer.writeln(Command.ENTRY.ordinal());
-                continue;
-            }
-
             // Exit at user's command
             if (commands.contains(Command.EXIT)) {
-                currentServer.writeln(Command.EXIT.ordinal());
                 System.exit(0);
                 break;
             }
 
-
-            // Send commands to server
-            for (Command command : commands) {
-                currentServer.writeln(command.ordinal());
+            // Retrieve the user's server selection and limit the value
+            switch (input.getSelectionChange()) {
+                case -1:
+                    serverManager.decrementSelector();
+                    break;
+                case 1:
+                    serverManager.incrementSelector();
+                    break;
             }
 
-            String incoming = "";
-            // Receive all actor states from server
-            try {
-                int numActors = currentServer.getNumActors();
-                for (int i = 0; i < numActors; i++) {
-                    incoming = currentServer.readln();
-                    actors.add(Actor.fromStream(incoming));
+            // Send ENTRY command iff user requests a respawn AND user is dead.
+            if (commands.contains(Command.RESPAWN)) {
+                if (!currentActors.containsKey(id)) {
+                    commands.add(Command.ENTRY);
                 }
-            } catch (IOException ex) {
-                System.err.println(ex.getMessage());
-                removeServer(currentServer);
-                currentServer = findNewServer();
+                commands.remove(Command.RESPAWN);
+            }
+
+
+            // Handle hyperspace requests
+            if (commands.contains(Command.HYPERSPACE)) {
+                if (hyperCoolDown == 0 && serverManager.canHyper()) {
+                    currentActors.clear();
+                    hyperCoolDown = hyperPeriod;
+                    serverManager.hyper();
+                }
+                // Do not send the hyperspace command to the server (ever)
+                commands.remove(Command.HYPERSPACE);
+            }
+            if (hyperCoolDown > 0) {
+                hyperCoolDown--;
+            }
+
+            // Retrieve the current server (also clears out dead servers)
+            Server server = serverManager.getCurrent();
+
+            // Send commands to server
+            try {
+                if (commands.size() > 4) {
+                    System.out.println(commands.size());
+                }
+                server.send(commands);
+                int numActors = server.receiveHeaders();
+                for (int i = 0; i < numActors; i++) {
+                    int id = server.receiveActor(actorBuffer, i);
+                    if (currentActors.containsKey(id)) {
+                        currentActors.get(id).updateFromStream(actorBuffer);
+                        nextActors.put(id, currentActors.get(id));
+                    } else {
+                        ActorType type = server.getActorType(i);
+                        nextActors.put(id, Actor.fromBuffer(type, id, actorBuffer));
+                    }
+                }
+            } catch (IOException e) {
+                serverManager.removeCurrent();
                 continue;
             } catch (Exception e) {
-                System.err.println(e.getMessage());
-                System.exit(-12);
+                e.printStackTrace();
+                System.exit(-1);
                 break;
             }
 
-            // Remove any disconnected servers
-            for (Connection.Server server : servers) {
-                if (!server.isAlive()) {
-                    removeServer(server);
-                }
-            }
-
             // Push the actors into the display
-            display.loadActors(actors);
-            actors.clear();
+            display.loadActors(nextActors.values());
+            Map<Integer, Actor> temp = currentActors;
+
+            // Flip the actor buffers
+            currentActors = nextActors;
+            nextActors = temp;
+            nextActors.clear();
+
             // Send the list of servers to the display
-            display.setServerNames(servers);
+            display.setServerNames(
+                    serverManager.getNames(),
+                    serverManager.getIndex(),
+                    serverManager.getSelector());
+
             display.repaint();
         }
-
-        for (Connection.Server server : servers) {
-            server.close();
-        }
-    }
-
-    private Connection.Server findNewServer() {
-        int current = servers.indexOf(currentServer);
-        int nextInt = -1;
-        do {
-            try {
-                nextInt = rand.nextInt(servers.size()); //TODO: threw an exceptoin, arg must be positive
-            } catch (IllegalArgumentException e) {
-                System.err.println("No servers left");
-                System.exit(-1); //TODO move somewhere else
-            }
-        } while (current != nextInt);
-        return servers.get(nextInt);
-    }
-
-    private synchronized void removeServer(Connection.Server server) {
-        servers.remove(server);
-    }
-
-    public synchronized void addServer(Connection.Server server) {
-        servers.add(server);
-    }
-
-    public boolean serverAlreadyConnected(InetAddress address, int port) {
-        for (Server server : servers) {
-            if (server.is(address, port)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public int numServers() {
-        return servers.size();
     }
 }

@@ -1,7 +1,7 @@
 package common;
 
 import java.awt.*;
-import java.util.LinkedList;
+import java.nio.DoubleBuffer;
 import javax.vecmath.Vector2d;
 
 /**
@@ -27,12 +27,14 @@ public class Missile extends Actor {
     private static final double IGNITION_DISTANCE = 20.0;
 
     // The number of time-steps the missile will stay active.
-    private static final int INIT_LIFE = 100;
+    private static final int INIT_LIFE = 50;
 
     // Remaining number of time-steps before the missile becomes inactive.
     private int lifetime = INIT_LIFE;
 
     private static final double DEFAULT_G = 0.001;
+    private static final int MISSILE_CRASH_EFFECT = 1;
+
 
     /**
      * Launch a missile from a spacecraft with the specified position and
@@ -46,7 +48,7 @@ public class Missile extends Actor {
      * @param heading spacecraft orientation
      */
     public Missile(Vector2d initPos, Vector2d initV, double heading) {
-        super(initPos, initV, 0);
+        super(initPos, initV);
         spriteGraphics.setColor(Color.WHITE);
         spriteGraphics.drawPolygon(shape);
         size = new Dimension(4, 4);
@@ -63,9 +65,9 @@ public class Missile extends Actor {
         super.stepTime(); // Force a position update
     }
 
-    Missile(String stream) {
-        super(stream);
-        spriteGraphics.setColor(Color.getHSBColor(((float)colourInt)/1000, 1f, 1f));
+    Missile(int id, double[] buffer) {
+        super(id, buffer);
+        spriteGraphics.setColor(Color.getHSBColor((float)buffer[0], 1f, 1f));
         spriteGraphics.drawPolygon(shape);
     }
 
@@ -84,9 +86,13 @@ public class Missile extends Actor {
 
 
     @Override
-    public int getID() {
+    public int getActorType() {
         return ActorType.MISSILE.ordinal();
     }
 
+    @Override
+    public int getCollisionDamage() {
+        return MISSILE_CRASH_EFFECT;
+    }
 
 }

@@ -3,64 +3,54 @@ package server;
 import common.Spacecraft;
 import common.Star;
 import common.Actor;
-import common.Command;
 import common.Game;
-import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.Random;
 import javax.vecmath.Vector2d;
+import server.ai.AI;
 
-//        int milliseconds_per_frame = (int)(1000.0/FRAME_RATE);
-//        timer = new Timer(milliseconds_per_frame, (ActionListener)this);
-//        timer.start();
 
 /**
- *
- * @author Simon, Daniel
+ * The GameEngine provides a front end to the physics engine
+ * and holds a collection of all in-game actors
+ * @author AIM, Simon, Daniel
  */
-public class GameEngine {
-    ArrayList<Actor> actors;
-    AI aiActor;
+class GameEngine {
+    ArrayList<Actor> actors; // All the current in-game actors
+    AI aiActor;              // The solitary AI spacecraft
 
     private Random rand;
 
     /**
-     *
+     * Adds the default actors to a new GameEngine
      */
-    public GameEngine() {
-        // Central star
+    GameEngine() {
         rand = new Random();
-        actors = new ArrayList<Actor>(100);
-        Dimension size = new Dimension(50,50); //TODO: something
-        actors.add(new Star(new Vector2d(0.5*Game.appSize.width,
-                0.5*Game.appSize.height),1000.0, 0)); //TODO: let star colour be set properly.
+        actors = new ArrayList<Actor>(Game.popcap); //NB: Pop cap not actually enforced
 
-        // The initial spacecraft
-        Spacecraft s1 = new Spacecraft.Wedge(new Vector2d(20.0, 20.0),
-                new Vector2d(-1.0, 0), rand.nextInt()*1000);
-        actors.add(s1);
+        // Add the star(s)
+        Vector2d starPos = new Vector2d(0.25*Game.appSize.width*(1 + 2*rand.nextDouble()),
+                0.25*Game.appSize.height*(1 + 2*rand.nextDouble()));
+        actors.add(new Star(starPos,1000.0));
 
-
+        // Add the AI spacecraft
         aiActor = new AI(new Vector2d(400.0, 400.0),
                 new Vector2d(1.0, -1.0));
         actors.add(aiActor);
     }
 
     /**
-     *
-     * @param colourInt The colour (hue) of the ship, 0-1000
-     * @return actor
+     * Creates a new client controlled spaceship
+     * @param id The clients id, which also determines the spacecraft's colour
+     * @return actor The new actor (which has already been added to the actor collection
      */
-    public Spacecraft addSpaceship(int colourInt) {
-        Vector2d position = new Vector2d(100,100); //TODO: get pos and vel from client, and angle
-        Vector2d velocity = new Vector2d(1,-1);
-        Spacecraft newActor = new Spacecraft.Wedge(position, velocity, colourInt);
+    Spacecraft addSpaceship(int id) {
+        Random rand = new Random();
+        Vector2d position = new Vector2d(rand.nextInt(Game.appSize.width),rand.nextInt(Game.appSize.height)); //TODO: get pos and vel from client, and angle
+        Vector2d velocity = new Vector2d(10*(rand.nextDouble()-0.5),10*(rand.nextDouble()-0.5));
+        Spacecraft newActor = new Spacecraft.Wedge(id, position, velocity);
         actors.add(newActor);
         return newActor;
-    }
-
-    public void act(Command command){
-
     }
 
     /**
@@ -69,7 +59,7 @@ public class GameEngine {
      * step, applies gravitational forces between all objects, and
      * removes any objects that have somehow become dead.
      */
-    public void stepTime() {
+    void stepTime() {
         // Look at every pair of objects to apply mutual forces
         // and detect collisions.
         for (int i = 0; i < actors.size(); ++i) {
@@ -78,8 +68,8 @@ public class GameEngine {
                 Actor otherActor = actors.get(j);
                 actor.gravitate(otherActor);
                 if (actor.hasCollidedWith(otherActor)) {
-                    actor.damage();
-                    otherActor.damage();
+                    actor.damage(otherActor.getCollisionDamage());
+                    otherActor.damage(actor.getCollisionDamage());
                 }
             }
         }

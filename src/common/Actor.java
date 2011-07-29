@@ -7,6 +7,8 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import javax.vecmath.Vector2d;
 import java.awt.geom.Rectangle2D;
+import java.nio.ByteBuffer;
+import java.nio.DoubleBuffer;
 import java.util.Random;
 
 /**
@@ -17,19 +19,20 @@ import java.util.Random;
  * @author Simon, Daniel, AIM
  */
 public abstract class Actor {
-
     // Maximum size of an onscreen object
     private static final int SPRITE_DIM = 20;
     // Default values for position and velocity vectors, heading, and
     // gravity constant
     private static final double DEFAULT_HEADING = Math.toRadians(1.0);
     private static final double DEFAULT_G = 1.0;
+    private static final double MAX_VELOCITY = 15;
     // Image representing the object on screen, and a graphics context
     // to draw to the image.
     private BufferedImage sprite;
     protected Graphics2D spriteGraphics;
     // Size of the object in pixels
     protected Dimension size;
+
     // Current position and velocity in the game-space
     private ToroidalCoordinate2D position;
     private Vector2d velocity;
@@ -40,75 +43,105 @@ public abstract class Actor {
     private double gravity_constant = DEFAULT_G;
     // True if the object is still active
     private boolean alive = true;
-    protected int colourInt;
-    private Random rand;
+    protected double colour;
+    protected int id;
+    private static int idCounter = 1;
+    public static final int NUM_ELEMENTS = 4;
 
-    public void setAngle(double angle) {
-        this.angle = angle;
-    }
 
     /**
-     * Changes the colourInt field of an actor and sets the colour of the sprite
-     * graphics to colourInt. The integer is divided by 1000 to give a floating
-     * point with 3 digits right of the decimal point (as these are the only
-     * digits which are used by getHSBColor)
-     * @param colourInt
+     * Creates a new Actor with the given id
+     * @param id The chosen id
      */
-    public void setColourInt(int colourInt) {
-        this.colourInt = colourInt;
-        spriteGraphics.setColor(Color.getHSBColor(((float)colourInt)/1000, 0.5f, 0.5f));
-    }
-
-
-    Actor(String stream) { // TODO throw invalid argument error
-        String[] vals = stream.split(" ");
-//        System.out.println(stream);
-        position = new ToroidalCoordinate2D(new Vector2d(Integer.valueOf(vals[0]), Integer.valueOf(vals[1])));
-        angle = ((double)Integer.valueOf(vals[2])) / 100;
-//        System.out.println(angle);
-        colourInt = Integer.valueOf(vals[3]);
+    private Actor(int id) {
+        this.id = id;
         sprite = new BufferedImage(SPRITE_DIM, SPRITE_DIM,
                 BufferedImage.TYPE_INT_ARGB);
         spriteGraphics = sprite.createGraphics();
+        size = new Dimension(SPRITE_DIM, SPRITE_DIM);
     }
 
-
-    public String toStream(){
-        StringBuilder buffer = new StringBuilder(20);
-        buffer.append(getID()).append(" ")
-              .append((int) position.getX()).append(" ")
-              .append((int) position.getY()).append(" ")
-              .append((int) (angle*100)).append(" ")
-              .append(colourInt);
-        return buffer.toString();
+    /**
+     * Creates a new actor with a brand new and hopefully unique ID
+     */
+    private Actor() {
+        this(idCounter++);
     }
 
+    /**
+     * @return The unique identifier of this actor
+     */
+    public int getID() {
+        return id;
+    }
 
-    public abstract int getID();
-
+    public Dimension getSize() {
+        return size;
+    }
     /**
      * Creates an object at the specified position and velocity
+     * @param id
      * @param initPos the object position
      * @param initV the object velocity
-     * @param colourInt the colour for the new object. An integer between 0-1000
      * gives the full range
      */
-    public Actor(Vector2d initPos, Vector2d initV, int colourInt) {
-        rand = new Random();
-//        colourInt = rand.nextInt(1000);
+    protected Actor(int id, Vector2d initPos, Vector2d initV) {
+        this(id);
         position = new ToroidalCoordinate2D(initPos);
         velocity = new Vector2d(initV);
-
-        // Set up the sprite that represents the object on screen
-        sprite = new BufferedImage(SPRITE_DIM, SPRITE_DIM,
-                BufferedImage.TYPE_INT_ARGB);
-        spriteGraphics = sprite.createGraphics();
-
-        // Default to an object size the same size as the sprite
-        size = new Dimension(SPRITE_DIM, SPRITE_DIM);
-        setColourInt(colourInt);
     }
 
+    /**
+     * Creates a new actor without choosing the id.
+     * @param pos The initial position
+     * @param vel The initial Velocity
+     */
+    protected Actor(Vector2d pos, Vector2d vel) {
+        this();
+        position = new ToroidalCoordinate2D(pos);
+        velocity = new Vector2d(vel);
+    }
+
+    /**
+     * For client side instantiating
+     * @param id
+     * @param buffer
+     */
+    protected Actor(int id, double[] buffer) {
+        this(id);
+        spriteGraphics.setColor(Color.getHSBColor((float)buffer[0], 0.5f, 0.5f));
+        position = new ToroidalCoordinate2D(new Vector2d(buffer[1], buffer[2]));
+//      velocity = new Vector2d(buffer[3], buffer[4]);
+        angle = buffer[3];
+    }
+
+
+    public void updateFromStream(double[] buffer) {
+        position = new ToroidalCoordinate2D(new Vector2d(buffer[1],buffer[2]));
+        // Don't use the colour
+//      spriteGraphics.setColor(Color.getHSBColor((float)buffer[0], 0.5f, 0.5f));
+        // Velocity not currently needed client-side
+//      velocity = new Vector2d(buffer[3], buffer[4]);
+        angle = buffer[3];
+    }
+
+
+    /**
+     * Saves the state of this actor to a buffer for transmission
+     * @param buffer The buffer to save to, needs to be Actor.NUM_ELEMENTS long
+     */
+    public void toStream(double[] buffer){
+        int i = 0;
+        buffer[i++] = colour;
+        buffer[i++] = position.getX();
+        buffer[i++] = position.getY();
+        buffer[i++] = angle;
+    }
+
+    /**
+     * @return The ordinal value of ActorType corresponding to this actor
+     */
+    public abstract int getActorType();
 
     /**
      * Renders the object sprite
@@ -126,7 +159,7 @@ public abstract class Actor {
     }
 
     /**
-     * Updates the position base don the current velocity.
+     * Updates the position based on the current velocity.
      */
     public void stepTime() {
         position.translate(velocity); // Assumes uniform timestep
@@ -138,6 +171,7 @@ public abstract class Actor {
      */
     public void accelerate(Vector2d deltaV) {
         velocity.add(deltaV);
+        velocity.clamp(-MAX_VELOCITY, MAX_VELOCITY);
     }
 
     /**
@@ -280,10 +314,17 @@ public abstract class Actor {
     /**
      * Makes the object move towards an inactive state, or become inactive
      * if it cannot sustain any more damage.
+     * @param damageTaken the damage this actor should take
      */
-    public void damage() {
+    public void damage(int damageTaken) {
         this.destroy();
     }
+
+    /**
+     * Gets the damage caused to the other actor by a collision with this actor
+     * @return
+     */
+    public abstract int getCollisionDamage();
 
     /**
      * @return true if the object is no longer active
@@ -309,58 +350,50 @@ public abstract class Actor {
         return theta;
     }
 
-    enum ActorType {
+
+    /**
+     * Used to cheaply determine which subclass of Actor has been transmitted to the server
+     */
+    public enum ActorType {
         NEEDLE,
         WEDGE,
         STAR,
-        MISSILE,
+        MISSILE;
+
+    /**
+     * Retrieve the Enumeration type from its ordinal value
+     * @param a
+     * @return
+     */
+    public static ActorType fromInt(int a) {
+            for (ActorType type : ActorType.values()) {
+                if (type.ordinal() == a) {
+                    return type;
+                }
+            }
+            return null;
+        }
     }
 
     /**
-     * Gets an actor out of a int stream
-     * @param stream
-     * @return
-     * @throws Exception
+     * Builds an actor out of a data buffer
+     * @param id the Actor's ID
+     * @param type The type of actor
+     * @param buffer The buffer to build from
+     * @return A new actor
      */
-    public static Actor fromStream(String stream) throws IllegalArgumentException {
-        ActorType requested = null;
-        int request = 0;
-        //try {
-         request = Integer.valueOf(stream.split(" ")[0]);
-        //} catch (Exception e) { System.err.println(e.getMessage()); System.exit(-7);}
-        for (ActorType type : ActorType.values()) {
-            if (request == type.ordinal()) {
-                requested = type;
-                break;
-            }
-        }
-
-        String buildStream = stream.substring(stream.indexOf(' ') + 1);
-//        System.out.println(buildStream);
-
-        if (requested == null) {
-            System.err.println("Request = " + request);
-            throw new IllegalArgumentException("Invalid actor type1");
-        }
-
-        Actor out;
-        switch (requested) {
+    public static Actor fromBuffer(ActorType type, int id, double[] buffer)  {
+        switch (type) {
             case NEEDLE:
-                out = new Spacecraft.Needle(buildStream);
-                break;
+                return new Spacecraft.Needle(buffer);
             case WEDGE:
-                out = new Spacecraft.Wedge(buildStream);
-                break;
+                return new Spacecraft.Wedge(id, buffer);
             case STAR:
-                out = new Star(buildStream);
-                break;
+                return new Star(buffer);
             case MISSILE:
-                out = new Missile(buildStream);
-                break;
-
+                return new Missile(id, buffer);
             default:
-                throw new IllegalArgumentException("Invalid actor type2");
+                throw new RuntimeException("Actor build failure");
         }
-        return out;
     }
 }
