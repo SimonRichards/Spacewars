@@ -321,8 +321,7 @@ public abstract class Actor {
     }
 
     /**
-     * Gets the damage caused to the other actor by a collision with this actor
-     * @return
+     * @return the damage caused to the other actor by a collision with this actor
      */
     public abstract int getCollisionDamage();
 
@@ -362,8 +361,8 @@ public abstract class Actor {
 
     /**
      * Retrieve the Enumeration type from its ordinal value
-     * @param a
-     * @return
+     * @param a the ordinal value of a ActorType
+     * @return The ActorType enum value requested (null if invalid)
      */
     public static ActorType fromInt(int a) {
             for (ActorType type : ActorType.values()) {
