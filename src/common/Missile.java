@@ -34,6 +34,7 @@ public class Missile extends Actor {
 
     private static final double DEFAULT_G = 0.001;
     private static final int MISSILE_CRASH_EFFECT = 1;
+    private static final double MAX_MISSLE_VEL = 50;
 
 
     /**
@@ -84,6 +85,10 @@ public class Missile extends Actor {
         }
     }
 
+    @Override
+    public double getMaxVel(){
+        return MAX_MISSLE_VEL;
+    }
 
     @Override
     public int getActorType() {

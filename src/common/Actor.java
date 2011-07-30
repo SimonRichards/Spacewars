@@ -171,7 +171,11 @@ public abstract class Actor {
      */
     public void accelerate(Vector2d deltaV) {
         velocity.add(deltaV);
-        velocity.clamp(-MAX_VELOCITY, MAX_VELOCITY);
+        velocity.clamp(-getMaxVel(), getMaxVel());
+    }
+
+    public double getMaxVel() {
+        return MAX_VELOCITY;
     }
 
     /**
