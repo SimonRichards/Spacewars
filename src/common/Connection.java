@@ -21,8 +21,17 @@ public abstract class Connection {
     protected Socket socket;
     protected DataOutputStream out;
     protected DataInputStream in;
+    protected String name;
+
+    /**
+     * @return The server's reported name
+     */
+    public String getName() {
+        return name;
+    }
 
     public static class Client extends Connection {
+        private static final int MAX_NAME_LENGTH = 20;
 
         private int id;
 
@@ -32,6 +41,13 @@ public abstract class Connection {
             out = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
             in = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
             id = in.readInt();
+            
+            char[] buffer = new char[MAX_NAME_LENGTH];
+            int i = 0;
+            do {
+                buffer[i] = in.readChar();
+            } while (buffer[i] != '\n' && ++i < MAX_NAME_LENGTH);
+            name = String.copyValueOf(buffer);
         }
 
         public int getID() {
@@ -84,7 +100,6 @@ public abstract class Connection {
     public static class Server extends Connection {
 
         private final ArrayList<Integer> actorList;
-        private final String name;
         private long lastRefreshed;
         private static final long TIMEOUT = 1200;
 
@@ -95,6 +110,7 @@ public abstract class Connection {
             out = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
             in = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
             out.writeInt(id);
+            out.writeChars(System.getProperty("user.name")+'\n');
             socket.setSoTimeout(1000);
             socket.setTcpNoDelay(true);
             lastRefreshed = System.currentTimeMillis();
@@ -131,13 +147,6 @@ public abstract class Connection {
                 out.writeInt(command.ordinal());
             }
             out.flush();
-        }
-
-        /**
-         * @return The server's reported name
-         */
-        public String getName() {
-            return name;
         }
 
         /**
