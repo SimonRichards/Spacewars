@@ -89,13 +89,19 @@ public abstract class Connection {
         /**
          * Sends the client a list of identifiers for all current actors on this server
          * @param actors The actors to convert into a header and transmit
+         * @param clients The clients currently connected to the server (their names are sent)
          * @throws IOException if transmission fails
          */
-        public void sendHeader(ArrayList<Actor> actors) throws IOException {
+        public void sendHeader(Collection<Actor> actors, Collection<Client> clients) throws IOException {
             out.writeInt(actors.size());
             for (Actor actor : actors) {
                 out.writeInt(actor.getID());
                 out.writeInt(actor.getActorType());
+            }
+
+            out.writeShort(clients.size());
+            for (Client client : clients) {
+                out.writeUTF(client.name);
             }
             out.flush();
         }
@@ -213,15 +219,22 @@ public abstract class Connection {
 
         /**
          * Retrieves the series of n + 1 ints that the server sends before actors
+         * @param clientNames A collection to fill with client names
          * @return Number of actors n in the above comment
          * @throws IOException if the server is down
          */
-        public int receiveHeaders() throws IOException {
+        public int receiveHeaders(Collection<String> clientNames) throws IOException {
             actorList.clear();
             int numActors = in.readInt();
             for (int i = 0; i < numActors * 2; i++) {
                 actorList.add(in.readInt());
             }
+
+            short numClients = in.readShort();
+            for (int i = 0; i < numClients; i++) {
+                clientNames.add(in.readUTF());
+            }
+
             return numActors;
         }
 

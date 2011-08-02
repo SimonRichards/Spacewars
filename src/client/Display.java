@@ -23,6 +23,7 @@ import javax.swing.Timer;
  * @author Simon, Daniel
  */
 class Display extends Canvas {
+    private static final int VERT_TEXT_INCR = 20;
 
     private BufferedImage offscreen; // Used to construct game view
     private Graphics2D offgraphics;  // Used to construct game view
@@ -33,6 +34,7 @@ class Display extends Canvas {
     private LinkedList<String> serverNames = new LinkedList<String> ();
     private int currentServer = 0;
     private int selectedServer = 0;
+    private final Collection<String> clientNames;
 
     /**
      * Create a new Display of the given size. Needs to match up to the
@@ -57,6 +59,7 @@ class Display extends Canvas {
         frame.getContentPane().add(this);
         frame.pack();
         frame.setVisible(true);
+        clientNames = new LinkedList<String>();
     }
 
     /**
@@ -105,6 +108,14 @@ class Display extends Canvas {
             i++;
         }
 
+        offgraphics.setPaint(Color.WHITE);
+        i = 20;
+        for (String name : clientNames) {
+            offgraphics.drawString(name, 10, i);
+            i += VERT_TEXT_INCR;
+        }
+
+
         // Update onscreen image
         g.drawImage(offscreen, 0, 0, null);
 
@@ -121,6 +132,12 @@ class Display extends Canvas {
         selectedServer = selected;
         serverNames.clear();
         serverNames.addAll(servers);
+    }
+
+    synchronized void setClientNames(Collection<String> clientNames) {
+        this.clientNames.clear();
+        this.clientNames.addAll(clientNames);
+        clientNames.clear();
     }
 
 }

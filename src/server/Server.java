@@ -113,7 +113,7 @@ public class Server extends TimerTask {
         //transmit the header to each client
         for (Connection.Client client : spacecraftFromClient.keySet()) {
             try {
-                client.sendHeader(engine.actors);
+                client.sendHeader(engine.actors, spacecraftFromClient.keySet());
             } catch (IOException e) {
                 removeClient(client);
             }

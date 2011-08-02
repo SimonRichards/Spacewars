@@ -3,17 +3,15 @@ package client;
 import common.Actor;
 import common.Actor.ActorType;
 import common.Command;
-import common.Connection;
 import common.Connection.Server;
 import common.Game;
 import java.io.IOException;
-import java.net.InetAddress;
+import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * A client object bundles the user interface (display and input) along with
@@ -30,6 +28,7 @@ public class Client implements Runnable {
     private int hyperCoolDown;
     private final int hyperPeriod = 5;
     private final ServerManager serverManager;
+    private final Collection<String> clientNames;
 
     /**
      * Starts up a client in its own thread, blocks until server is found
@@ -56,6 +55,7 @@ public class Client implements Runnable {
         nextActors = new HashMap<Integer, Actor>(50);
         display = new Display(Game.appSize, input);
         actorBuffer = new double[Actor.NUM_ELEMENTS];
+        clientNames = new LinkedList<String>();
     }
 
     /**
@@ -115,7 +115,7 @@ public class Client implements Runnable {
                     System.out.println(commands.size());
                 }
                 server.send(commands);
-                int numActors = server.receiveHeaders();
+                int numActors = server.receiveHeaders(clientNames);
                 for (int i = 0; i < numActors; i++) {
                     int id = server.receiveActor(actorBuffer, i);
                     if (currentActors.containsKey(id)) {
@@ -149,6 +149,9 @@ public class Client implements Runnable {
                     serverManager.getNames(),
                     serverManager.getIndex(),
                     serverManager.getSelector());
+
+            display.setClientNames(clientNames);
+            clientNames.clear();
 
             display.repaint();
         }
