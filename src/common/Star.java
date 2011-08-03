@@ -62,7 +62,7 @@ public class Star extends Actor {
     private void setSprite() {
         // Define a sprite for the star. This is basically just a whole
         // mess of lines.
-        spriteGraphics.setColor(Color.WHITE);
+        spriteGraphics.setColor(Color.YELLOW);
         spriteGraphics.drawPolygon(shape);
     }
 
