@@ -2,10 +2,10 @@ package server.ai;
 
 import common.Actor;
 import common.Command;
+import common.Command;
 import common.Spacecraft;
 import java.util.Collection;
 import java.util.EnumSet;
-import java.util.Iterator;
 import java.util.Random;
 import javax.vecmath.Vector2d;
 
@@ -23,6 +23,7 @@ public class AI extends Spacecraft.Needle {
     private int counterLength = 0;
     private final CollisionAvoidance collisionAvoidance;
     private static final double AIMING_THRESH = 0.1;
+    private static final double TURNING_DEADZONE = 0.1;
 
 
     public AI(Vector2d pos, Vector2d vel) {
@@ -41,30 +42,20 @@ public class AI extends Spacecraft.Needle {
     public Collection<Command> update(Collection<Actor> actors){ //TODO: support multiple wedges
         Collection<Command> commands = collisionAvoidance.update(actors);
         if(collisionAvoidance.isIdle()){
-            for(Actor target : actors){
-                if(target.getID() == Actor.ActorType.WEDGE.ordinal()){
+            searchLoop: for(Actor target : actors){
+                if(target.getActorType() == Actor.ActorType.WEDGE.ordinal()){
                     double angleDiff = getHeading() - getPosition().angle(target.getPosition());
-                    commands.add(angleDiff > 0 ? Command.TURN_CCW : Command.TURN_CW);
+                    System.out.println(angleDiff);
+                    if (Math.abs(angleDiff) > TURNING_DEADZONE) {
+                        commands.add(angleDiff > 0 ? Command.TURN_CCW : Command.TURN_CW);
+                    }
                     if(Math.abs(angleDiff) < AIMING_THRESH){
                         commands.add(Command.FIRE);
-                        // TODO: might add random rotation here
+                        break searchLoop;
                     }
-                    break;
                 }
             }
         }
-
-//        if (counter++ > counterLength) {
-//            counterLength = rand.nextInt(MAX_COUNT);
-//            counter = 0;
-//            output.clear();
-//            for (Command choice : choices) {
-//                if (rand.nextDouble() < CHOICE_PROB) {
-//                    output.add(choice);
-//                }
-//            }
-//        }
-//        return output;
         return commands;
     }
 }

@@ -45,10 +45,10 @@ class GameEngine {
      * @return actor The new actor (which has already been added to the actor collection
      */
     Spacecraft addSpaceship(int id) {
-        Random rand = new Random();
-        Vector2d position = new Vector2d(rand.nextInt(Game.appSize.width),rand.nextInt(Game.appSize.height)); //TODO: get pos and vel from client, and angle
+        Vector2d position = new Vector2d(rand.nextInt(Game.appSize.width),rand.nextInt(Game.appSize.height));
         Vector2d velocity = new Vector2d(10*(rand.nextDouble()-0.5),10*(rand.nextDouble()-0.5));
         Spacecraft newActor = new Spacecraft.Wedge(id, position, velocity);
+        newActor.rotate(rand.nextDouble()*Math.PI*2);
         actors.add(newActor);
         return newActor;
     }

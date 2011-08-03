@@ -29,7 +29,7 @@ public class CollisionAvoidance {
 
     public Collection<Command> update(Collection<Actor> actors){
         idle = true;
-        Collection<Command> commands = new LinkedList<Command>();
+        Collection<Command> commands = EnumSet.noneOf(Command.class);
         for(Actor threat : actors){
             if(collisionImminent(threat)){
                 commands = avoid();

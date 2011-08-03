@@ -134,6 +134,10 @@ class Display extends Canvas {
         serverNames.addAll(servers);
     }
 
+    /**
+     * Empties the given collection of names into this object's own container for thread safety
+     * @param clientNames The list of strings to print as clients connected to the current server
+     */
     synchronized void setClientNames(Collection<String> clientNames) {
         this.clientNames.clear();
         this.clientNames.addAll(clientNames);

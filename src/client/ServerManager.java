@@ -32,10 +32,10 @@ class ServerManager implements Runnable {
     private ArrayList<String> names;
 
     /**
-     * Connects to the local server and listens to
-     * @param port
-     * @param id
-     * @throws IOException
+     * Connects to the local server joins the multicast group
+     * @param port The local server's TCP port
+     * @param id The client's ID
+     * @throws IOException if the UDP or TCP connections fail
      */
     ServerManager(int port, int id) throws IOException {
         servers = new CopyOnWriteArrayList<Server>();
