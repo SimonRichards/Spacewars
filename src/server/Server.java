@@ -95,7 +95,10 @@ public class Server extends TimerTask {
                             addActorfromClient(client);
                             break;
                         default:
-                            handleCommand(spacecraftFromClient.get(client), input);
+                            Spacecraft sc = spacecraftFromClient.get(client);
+                            if (sc != null) {
+                                handleCommand(sc, input);
+                            }
                     }
                 }
             } catch (IOException e) {
