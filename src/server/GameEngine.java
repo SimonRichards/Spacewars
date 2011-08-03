@@ -33,6 +33,13 @@ class GameEngine {
                 0.25*Game.appSize.height*(1 + 2*rand.nextDouble()));
         actors.add(new Star(starPos,1000.0));
 
+        // 50/50 chance of getting a binary star
+        if (rand.nextBoolean()) {
+            Vector2d binaryPos = new Vector2d(0.25*Game.appSize.width*(1 + 2*rand.nextDouble()),
+                    0.25*Game.appSize.height*(1 + 2*rand.nextDouble()));
+            actors.add(new Star(binaryPos,1000.0));
+        }
+
         // Add the AI spacecraft
         aiActor = new AI(new Vector2d(400.0, 400.0),
                 new Vector2d(1.0, -1.0));

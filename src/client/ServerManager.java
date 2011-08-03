@@ -5,13 +5,11 @@ import common.Connection.Server;
 import common.Game;
 import java.io.IOException;
 import java.net.DatagramPacket;
-import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
-import java.util.AbstractCollection;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
+import java.util.Collections;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -91,7 +89,7 @@ class ServerManager implements Runnable {
      * @return Names of all collected servers
      */
     Collection<String> getNames() {
-        return names;
+        return Collections.unmodifiableList(names);
     }
 
     /**
@@ -115,7 +113,10 @@ class ServerManager implements Runnable {
      * @return The server to use for one game loop
      */
     Server getCurrent() {
-        while(servers.isEmpty());
+        if (servers.isEmpty()) {
+            System.err.println("All server connections lost");
+            System.exit(0);
+        }
         for (Connection.Server server : servers) {
             if (!server.isAlive()) {
                 servers.remove(server);
