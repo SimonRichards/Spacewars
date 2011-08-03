@@ -58,7 +58,6 @@ public abstract class Connection {
                 buffer[i] = in.readChar();
             } while (buffer[i] != '\n' && ++i < MAX_NAME_LENGTH);
             name = String.copyValueOf(buffer);
-            System.out.println(name);
         }
 
         /**
@@ -233,7 +232,7 @@ public abstract class Connection {
 
             short numClients = in.readShort();
             for (int i = 0; i < numClients; i++) {
-                clientNames.add(in.readUTF());
+                clientNames.add(in.readUTF().trim());
             }
 
             return numActors;
