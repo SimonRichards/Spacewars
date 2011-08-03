@@ -58,6 +58,7 @@ public abstract class Connection {
                 buffer[i] = in.readChar();
             } while (buffer[i] != '\n' && ++i < MAX_NAME_LENGTH);
             name = String.copyValueOf(buffer);
+            System.out.println(name);
         }
 
         /**
