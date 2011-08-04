@@ -12,7 +12,7 @@ import javax.vecmath.Vector2d;
  */
 public class Star extends Actor {
 
-    private static final double DEFAULT_G = 1000000.0;
+    private static final double DEFAULT_G = 1000.0;
     private static final int STAR_CRASH_EFFECT = 1000;
     private static Polygon shape = new Polygon(new int[] {10, 20, 11, 10, 9, 0, 10,
                                                           10, 9, 5, 15, 11, 5, 15},
@@ -43,7 +43,7 @@ public class Star extends Actor {
      * @param G the gravitational constant of the star.
      */
     public Star(Vector2d pos, double G) {
-        super(new Vector2d(pos), new Vector2d(1.0, 0.0));
+        super(new Vector2d(pos), new Vector2d(0.0, 0.0));
         this.setGravityConstant(G);
         setSprite();
     }
@@ -86,12 +86,25 @@ public class Star extends Actor {
         // updates. This avoids any problems with numerical rounding
         // errors. A more realistic model might allow stars to influence
         // each other. This is easily achieved by inserting a call to
-        // super.stepTime() here.
+        super.stepTime();
 
         // Although stars can't move, but rotating them gives a twinkle
         this.rotate(Math.PI/4.0);
     }
 
+    /**
+     * Rather than using relative masses this methods simply skips gravitation
+     * towards non-stars
+     * @param other The other actor, only acted upon if it is a star as well
+     */
+    @Override
+    public void gravitate(Actor other) {
+        Vector2d velocity = this.getVelocity();
+        super.gravitate(other);
+        if (!(other instanceof  Star)) {
+            this.setVelocity(velocity);
+        }
+    }
 
     /**
      * @return ActorType.STAR's ordinal value

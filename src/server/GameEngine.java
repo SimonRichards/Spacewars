@@ -18,6 +18,10 @@ import server.ai.AI;
 class GameEngine {
     ArrayList<Actor> actors; // All the current in-game actors
     AI aiActor;              // The solitary AI spacecraft
+    private final static double WIDE_STAR_VEL = 1.5;
+    private final static double WIDE_STAR_DIST = 200;
+    private final static double TIGHT_STAR_VEL = 2;
+    private final static double TIGHT_STAR_DIST = 100;
 
     private Random rand;
 
@@ -31,13 +35,34 @@ class GameEngine {
         // Add the star(s)
         Vector2d starPos = new Vector2d(0.25*Game.appSize.width*(1 + 2*rand.nextDouble()),
                 0.25*Game.appSize.height*(1 + 2*rand.nextDouble()));
-        actors.add(new Star(starPos,1000.0));
+        Star firstStar = new Star(starPos);
+        actors.add(firstStar);
 
         // 50/50 chance of getting a binary star
+        // Distances and velocities for binary stars were not found with maths, changing anything
+        // Including the appsize, will necessitate disabling this feature
+        double star_dist, star_vel;
         if (rand.nextBoolean()) {
-            Vector2d binaryPos = new Vector2d(0.25*Game.appSize.width*(1 + 2*rand.nextDouble()),
-                    0.25*Game.appSize.height*(1 + 2*rand.nextDouble()));
-            actors.add(new Star(binaryPos,1000.0));
+            // Place the left star in the left side of the screen
+            double x = rand.nextDouble()*Game.appSize.width/2;
+            // And in the central half of the y axis
+            double y = rand.nextDouble()*Game.appSize.height/2+ Game.appSize.height/4;
+            firstStar.setPosition(new Vector2d(x,y));
+
+            // 50/50 split on the binary stars' initial separation
+            if (rand.nextBoolean()) {
+                star_dist = WIDE_STAR_DIST;
+                star_vel = WIDE_STAR_VEL;
+            } else {
+                star_dist = TIGHT_STAR_DIST;
+                star_vel = TIGHT_STAR_VEL;
+            }
+            Vector2d binaryPos = new Vector2d(firstStar.getPosition());
+            binaryPos.add(new Vector2d(star_dist, 0));
+            Star secondStar = new Star(binaryPos);
+            firstStar.setVelocity(new Vector2d(0, star_vel));
+            secondStar.setVelocity(new Vector2d(0, -star_vel));
+            actors.add(secondStar);
         }
 
         // Add the AI spacecraft

@@ -219,6 +219,7 @@ public abstract class Connection {
 
         /**
          * Retrieves the series of n + 1 ints that the server sends before actors
+         * Retrieves a list of connected client's  names
          * @param clientNames A collection to fill with client names
          * @return Number of actors n in the above comment
          * @throws IOException if the server is down
