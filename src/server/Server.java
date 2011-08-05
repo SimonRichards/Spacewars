@@ -88,6 +88,12 @@ public class Server extends TimerTask {
         listener.loadNewClients(clients);
     }
 
+    /**
+     * Finishes the initialization with blocking
+     * code that cannot be run in main thread by
+     * blocking until local client is found then
+     * starting a server advertising service.
+     */
     private void findLocalClient() {
         localClient = listener.blockUntilClient();
         clients.add(localClient);
@@ -186,7 +192,7 @@ public class Server extends TimerTask {
     }
 
     /**
-     * Transmits the entire gamestate to all currently playing clients
+     * Transmits the entire game state to all currently playing clients
      */
     private void transmitState() {
         //transmit the header to each client
