@@ -14,31 +14,26 @@ import javax.vecmath.Vector2d;
  * @author Simon, Daniel
  */
 public class AI extends Spacecraft.Needle {
-    private final EnumSet<Command> output;
-    private final EnumSet<Command> choices;
-    private final Random rand;
-    private final static int MAX_COUNT = 100;
-    private final static double CHOICE_PROB = 0.5;
-    private int counter = 0;
-    private int counterLength = 0;
     private final CollisionAvoidance collisionAvoidance;
     private static final double AIMING_THRESH = 0.1;
     private static final double TURNING_DEADZONE = 0.1;
 
 
+    /**
+     * Creates an AI spacecraft which is a Needle with the ability to move itself
+     * @param pos The initial position
+     * @param vel The initial velocity
+     */
     public AI(Vector2d pos, Vector2d vel) {
         super(pos, vel);
-        output = EnumSet.noneOf(Command.class);
-        choices = EnumSet.of(
-                Command.FORWARD,
-                Command.FIRE,
-                Command.TURN_CCW,
-                Command.TURN_CW);
-        rand = new Random();
-        counterLength = rand.nextInt(MAX_COUNT);
         collisionAvoidance = new CollisionAvoidance(this);
     }
 
+    /**
+     * Tracks a player controlled spacecraft and fires if facing (roughly) towards it
+     * @param actors The actor list to scan for players
+     * @return An appropriate command set
+     */
     public Collection<Command> update(Collection<Actor> actors){ //TODO: support multiple wedges
         Collection<Command> commands = collisionAvoidance.update(actors);
         if(collisionAvoidance.isIdle()){

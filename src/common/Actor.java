@@ -116,6 +116,10 @@ public abstract class Actor {
     }
 
 
+    /**
+     * For client side updating
+     * @param buffer The buffer to update from
+     */
     public void updateFromStream(double[] buffer) {
         position = new ToroidalCoordinate2D(new Vector2d(buffer[1],buffer[2]));
         // Don't use the colour

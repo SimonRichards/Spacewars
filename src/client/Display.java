@@ -1,21 +1,19 @@
 package client;
 
 import common.Actor;
-import common.Connection.Server;
+import common.Game;
 import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.event.KeyAdapter;
 import java.awt.event.KeyListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
 import javax.swing.JFrame;
-import javax.swing.Timer;
 
 /**
  * A Display will paint a given set of actors and list server names.
@@ -23,15 +21,13 @@ import javax.swing.Timer;
  * @author Simon, Daniel
  */
 class Display extends Canvas {
-    private static final int VERT_TEXT_INCR = 20;
 
-    private BufferedImage offscreen; // Used to construct game view
-    private Graphics2D offgraphics;  // Used to construct game view
-    private static final String appName = "Spacewar(s)!";
-    private static final Dimension appSize = new Dimension(500, 500);
-    // Tracks all objects currently in the game-space.
-    private LinkedList<Actor> actors = new LinkedList<Actor>();
-    private LinkedList<String> serverNames = new LinkedList<String> ();
+    private static final int VERT_TEXT_INCR = 20;
+    private final BufferedImage offscreen; // Used to construct game view
+    private final Graphics2D offgraphics;  // Used to construct game view
+    private static final String APPNAME = "Spacewar(s)!";
+    private final List<Actor> actors;
+    private final List<String> serverNames;
     private int currentServer = 0;
     private int selectedServer = 0;
     private final Collection<String> clientNames;
@@ -44,22 +40,24 @@ class Display extends Canvas {
      */
     Display(final Dimension size, final KeyListener listener) {
         super();
-        setPreferredSize(appSize);
-        setMinimumSize(appSize);
-        setMaximumSize(appSize);
+        actors = new LinkedList<Actor>();
+        serverNames = new ArrayList<String>(Game.appSize.height / VERT_TEXT_INCR);
+        clientNames = new ArrayList<String>(Game.appSize.height / VERT_TEXT_INCR);
+        setPreferredSize(Game.appSize);
+        setMinimumSize(Game.appSize);
+        setMaximumSize(Game.appSize);
         offscreen = new BufferedImage(size.width, size.height,
                 BufferedImage.TYPE_INT_ARGB);
         offgraphics = offscreen.createGraphics();
-        JFrame frame = new JFrame(appName);
+        final JFrame frame = new JFrame(APPNAME);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(appSize);
+        frame.setSize(Game.appSize);
         frame.setResizable(false);
         frame.addKeyListener(listener);
         this.addKeyListener(listener);
         frame.getContentPane().add(this);
         frame.pack();
         frame.setVisible(true);
-        clientNames = new LinkedList<String>();
     }
 
     /**
@@ -73,52 +71,51 @@ class Display extends Canvas {
 
     /**
      * Render the game.
-     * @param g the Graphics object to draw on
+     * @param graphics the Graphics object to draw on
      */
-    public void paint(Graphics g) {
-        update(g);
+    public void paint(final Graphics graphics) {
+        update(graphics);
     }
 
     /**
      * Render the game.
-     * @param g the Graphics object to draw on
+     * @param graphics the Graphics object to draw on
      */
-    public synchronized void update(Graphics g) {
+    public void update(final Graphics graphics) {
         // Clear the offscreen image
         offgraphics.setColor(Color.BLACK);
         offgraphics.fillRect(0, 0, getSize().width, getSize().height);
 
-        // Render objects
-        for (Actor actor : actors) {
-            actor.draw(offgraphics);
-        }
-
-
-        offgraphics.setColor(Color.RED);
-        int i = 0;
-        for (String name : serverNames) {
-            if (i == currentServer) {
-                offgraphics.setPaint(Color.RED);
-            } else if (i == selectedServer) {
-                offgraphics.setPaint(Color.YELLOW);
-            } else {
-                offgraphics.setPaint(Color.WHITE);
+        synchronized (this) {
+            // Render objects
+            for (Actor actor : actors) {
+                actor.draw(offgraphics);
             }
-            offgraphics.drawString(name, appSize.width - 100, 20*i + 10);
-            i++;
-        }
 
-        offgraphics.setPaint(Color.WHITE);
-        i = 20;
-        for (String name : clientNames) {
-            offgraphics.drawString(name, 10, i);
-            i += VERT_TEXT_INCR;
-        }
 
+            offgraphics.setColor(Color.RED);
+            int i = 0;
+            for (i = 0; i < serverNames.size(); i++) {
+                if (i == currentServer) {
+                    offgraphics.setPaint(Color.RED);
+                } else if (i == selectedServer) {
+                    offgraphics.setPaint(Color.YELLOW);
+                } else {
+                    offgraphics.setPaint(Color.WHITE);
+                }
+                offgraphics.drawString(serverNames.get(i), Game.appSize.width - 100, 20 * i + 10);
+            }
+
+            offgraphics.setPaint(Color.WHITE);
+            i = 20;
+            for (String name : clientNames) {
+                offgraphics.drawString(name, 10, i);
+                i += VERT_TEXT_INCR;
+            }
+        }
 
         // Update onscreen image
-        g.drawImage(offscreen, 0, 0, null);
-
+        graphics.drawImage(offscreen, 0, 0, null);
     }
 
     /**
@@ -143,5 +140,4 @@ class Display extends Canvas {
         this.clientNames.addAll(clientNames);
         clientNames.clear();
     }
-
 }

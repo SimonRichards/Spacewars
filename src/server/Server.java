@@ -105,6 +105,7 @@ public class Server extends TimerTask {
                 removeClient(client);
             }
         }
+        
         // Handle the ai actor's commands
         for (Command command : engine.aiActor.update(Collections.unmodifiableCollection(engine.actors))) {
             handleCommand(engine.aiActor, command);

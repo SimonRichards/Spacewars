@@ -46,7 +46,7 @@ class GameEngine {
             // Place the left star in the left side of the screen
             double x = rand.nextDouble()*Game.appSize.width/2;
             // And in the central half of the y axis
-            double y = rand.nextDouble()*Game.appSize.height/2+ Game.appSize.height/4;
+            double y = (2*rand.nextDouble()*Game.appSize.height + Game.appSize.height) / 4;
             firstStar.setPosition(new Vector2d(x,y));
 
             // 50/50 split on the binary stars' initial separation

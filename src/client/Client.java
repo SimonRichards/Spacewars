@@ -19,23 +19,25 @@ import java.util.Random;
  * @author Simon, Daniel
  */
 public class Client implements Runnable {
+
     private final InputHandler input;
-    private Display display;
+    private final Display display;
     private Map<Integer, Actor> currentActors;
     private Map<Integer, Actor> nextActors;
-    private double[] actorBuffer;
-    private final int id;
+    private final double[] actorBuffer;
+    private final int clientID;
     private int hyperCoolDown;
-    private final int hyperPeriod = 5;
+    private static final int HYPERPERIOD = 5;
     private final ServerManager serverManager;
     private final Collection<String> clientNames;
+    private Server server;
 
     /**
-     * Starts up a client in its own thread, blocks until server is found
+     * Starts up a client in its own thread, blocks until server is found.
      * @param tcpPort The port on which to connect to the local server
      * @throws IOException If the local server cannot be found
      */
-    public static void start(int tcpPort) throws IOException{
+    public static void start(final int tcpPort) throws IOException {
         new Thread(new Client(tcpPort)).start();
     }
 
@@ -46,9 +48,9 @@ public class Client implements Runnable {
      * @param port The TCP/IP port to find the local server on
      * @throws IOException if there is an error in the TCP protocol
      */
-    private Client(int port) throws IOException {
-        id = new Random().nextInt();
-        serverManager = new ServerManager(port, id);
+    Client(final int port) throws IOException {
+        clientID = new Random().nextInt();
+        serverManager = new ServerManager(port, clientID);
         serverManager.start();
         input = new InputHandler();
         currentActors = new HashMap<Integer, Actor>(50);
@@ -64,96 +66,80 @@ public class Client implements Runnable {
     @Override
     public void run() {
         while (true) {
-            // Retrieve keyboard input
-            EnumSet<Command> commands = input.read();
-
-            // Exit at user's command
-            if (commands.contains(Command.EXIT)) {
-                System.exit(0);
-                break;
-            }
-
-            // Retrieve the user's server selection and limit the value
-            switch (input.getSelectionChange()) {
-                case -1:
-                    serverManager.decrementSelector();
-                    break;
-                case 1:
-                    serverManager.incrementSelector();
-                    break;
-            }
-
-            // Send ENTRY command iff user requests a respawn AND user is dead.
-            if (commands.contains(Command.RESPAWN)) {
-                if (!currentActors.containsKey(id)) {
-                    commands.add(Command.ENTRY);
-                }
-                commands.remove(Command.RESPAWN);
-            }
-
-
-            // Handle hyperspace requests
-            if (commands.contains(Command.HYPERSPACE)) {
-                if (hyperCoolDown == 0 && serverManager.canHyper()) {
-                    currentActors.clear();
-                    hyperCoolDown = hyperPeriod;
-                    serverManager.hyper();
-                }
-                // Do not send the hyperspace command to the server (ever)
-                commands.remove(Command.HYPERSPACE);
-            }
-            if (hyperCoolDown > 0) {
-                hyperCoolDown--;
-            }
-
-            // Retrieve the current server (also clears out dead servers)
-            Server server = serverManager.getCurrent();
-
-            // Send commands to server
             try {
-                if (commands.size() > 4) {
-                    System.out.println(commands.size());
-                }
-                server.send(commands);
-                int numActors = server.receiveHeaders(clientNames);
-                for (int i = 0; i < numActors; i++) {
-                    int id = server.receiveActor(actorBuffer, i);
-                    if (currentActors.containsKey(id)) {
-                        currentActors.get(id).updateFromStream(actorBuffer);
-                        nextActors.put(id, currentActors.get(id));
-                    } else {
-                        ActorType type = server.getActorType(i);
-                        nextActors.put(id, Actor.fromBuffer(type, id, actorBuffer));
-                    }
-                }
+                server = serverManager.getCurrent();
+                handleCommands(input.read());
+                serverManager.selectServer(input.getSelectionChange());
+                receiveState();
+                updateDisplay();
             } catch (IOException e) {
                 serverManager.removeCurrent();
                 continue;
-            } catch (Exception e) {
-                e.printStackTrace();
-                System.exit(-1);
-                break;
             }
-
-            // Push the actors into the display
-            display.loadActors(nextActors.values());
-            Map<Integer, Actor> temp = currentActors;
-
-            // Flip the actor buffers
-            currentActors = nextActors;
-            nextActors = temp;
-            nextActors.clear();
-
-            // Send the list of servers to the display
-            display.setServerNames(
-                    serverManager.getNames(),
-                    serverManager.getIndex(),
-                    serverManager.getSelector());
-
-            display.setClientNames(clientNames);
-            clientNames.clear();
-
-            display.repaint();
         }
+    }
+
+    private void handleCommands(final EnumSet<Command> commands) throws IOException {
+        if (commands.contains(Command.EXIT)) {
+            System.exit(0);
+        }
+        // Send ENTRY command iff user requests a respawn AND user is dead.
+        if (commands.contains(Command.RESPAWN)) {
+            if (!currentActors.containsKey(clientID)) {
+                commands.add(Command.ENTRY);
+            }
+            commands.remove(Command.RESPAWN);
+        }
+
+
+        // Handle hyperspace requests
+        if (commands.contains(Command.HYPERSPACE)) {
+            if (hyperCoolDown == 0 && serverManager.canHyper()) {
+                currentActors.clear();
+                hyperCoolDown = HYPERPERIOD;
+                serverManager.hyper();
+            }
+            // Do not send the hyperspace command to the server (ever)
+            commands.remove(Command.HYPERSPACE);
+        }
+        if (hyperCoolDown > 0) {
+            hyperCoolDown--;
+        }
+        server.send(commands);
+    }
+
+    private void receiveState() throws IOException {
+        final int numActors = server.receiveHeaders(clientNames);
+        for (int i = 0; i < numActors; i++) {
+            final int actorID = server.receiveActor(actorBuffer, i);
+            if (currentActors.containsKey(actorID)) {
+                currentActors.get(actorID).updateFromStream(actorBuffer);
+                nextActors.put(actorID, currentActors.get(actorID));
+            } else {
+                final ActorType type = server.getActorType(i);
+                nextActors.put(actorID, Actor.fromBuffer(type, actorID, actorBuffer));
+            }
+        }
+
+        // Push the actors into the display
+        display.loadActors(nextActors.values());
+        final Map<Integer, Actor> temp = currentActors;
+
+        // Flip the actor buffers
+        currentActors = nextActors;
+        nextActors = temp;
+        nextActors.clear();
+    }
+
+    private void updateDisplay() {
+        display.setServerNames(
+                serverManager.getNames(),
+                serverManager.getIndex(),
+                serverManager.getSelector());
+
+        display.setClientNames(clientNames);
+        clientNames.clear();
+
+        display.repaint();
     }
 }

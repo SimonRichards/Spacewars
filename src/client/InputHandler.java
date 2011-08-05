@@ -23,6 +23,7 @@ class InputHandler extends KeyAdapter {
      * Maps keys to commands and instantiates containers
      */
     InputHandler() {
+        super();
         commandFromKey = new HashMap<Integer,Command>(Command.values().length, 1.0f);
         commandFromKey.put(KeyEvent.VK_SPACE, Command.FIRE);
         commandFromKey.put(KeyEvent.VK_W, Command.FORWARD);
@@ -46,34 +47,34 @@ class InputHandler extends KeyAdapter {
      * Not to be called in user code.
      * @param k the keystroke
      */
-    public synchronized void keyPressed(KeyEvent k) {
-        if (!upHeld && k.getKeyCode() == KeyEvent.VK_UP){
+    public synchronized void keyPressed(KeyEvent key) {
+        if (!upHeld && key.getKeyCode() == KeyEvent.VK_UP){
             selectionChange = -1;
             upHeld = true;
-        } else if (!downHeld && k.getKeyCode() == KeyEvent.VK_DOWN) {
+        } else if (!downHeld && key.getKeyCode() == KeyEvent.VK_DOWN) {
             selectionChange = 1;
             downHeld = true;
         }
 
-        if (commandFromKey.containsKey(k.getKeyCode())) {
-            commands.add(commandFromKey.get(k.getKeyCode()));
+        if (commandFromKey.containsKey(key.getKeyCode())) {
+            commands.add(commandFromKey.get(key.getKeyCode()));
         }
     }
 
     /**
      * Removes a key's command (if any) from the set.
      * Not to be called in user code.
-     * @param k the keystroke
+     * @param key the keystroke
      */
     @Override
-    public synchronized void keyReleased(KeyEvent k) {
-        if (commandFromKey.containsKey(k.getKeyCode())) {
-            commands.remove(commandFromKey.get(k.getKeyCode()));
+    public synchronized void keyReleased(KeyEvent key) {
+        if (commandFromKey.containsKey(key.getKeyCode())) {
+            commands.remove(commandFromKey.get(key.getKeyCode()));
         }
 
-        if (k.getKeyCode() == KeyEvent.VK_UP){
+        if (key.getKeyCode() == KeyEvent.VK_UP){
             upHeld = false;
-        } else if (k.getKeyCode() == KeyEvent.VK_DOWN) {
+        } else if (key.getKeyCode() == KeyEvent.VK_DOWN) {
             downHeld = false;
         }
 
@@ -84,7 +85,7 @@ class InputHandler extends KeyAdapter {
      * @return +1 if the user has pressed down, -1 for up and 0 otherwise
      */
     synchronized int getSelectionChange() {
-        int temp = selectionChange;
+        final int temp = selectionChange;
         selectionChange = 0;
         return temp;
     }

@@ -10,7 +10,7 @@ import javax.vecmath.Vector2d;
  *
  * @author AIM, Simon, Daniel
  */
-public class Star extends Actor {
+public class Star extends Actor  {
 
     private static final double DEFAULT_G = 1000.0;
     private static final int STAR_CRASH_EFFECT = 1000;
@@ -34,7 +34,10 @@ public class Star extends Actor {
      */
     Star(double[] buffer) {
         super(0, buffer);
-        setSprite();
+        // Define a sprite for the star. This is basically just a whole
+        // mess of lines.
+        spriteGraphics.setColor(Color.YELLOW);
+        spriteGraphics.drawPolygon(shape);
     }
 
     /**
@@ -45,7 +48,6 @@ public class Star extends Actor {
     public Star(Vector2d pos, double G) {
         super(new Vector2d(pos), new Vector2d(0.0, 0.0));
         this.setGravityConstant(G);
-        setSprite();
     }
 
     /**
@@ -54,16 +56,6 @@ public class Star extends Actor {
     @Override
     public void destroy() {
         return;
-    }
-
-    /**
-     * Set's up the star's sprite, for use by constructors
-     */
-    private void setSprite() {
-        // Define a sprite for the star. This is basically just a whole
-        // mess of lines.
-        spriteGraphics.setColor(Color.YELLOW);
-        spriteGraphics.drawPolygon(shape);
     }
 
     /**

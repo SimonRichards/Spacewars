@@ -17,7 +17,7 @@ public class Game {
     private Game() {
     }
 
-    public static long GAME_PERIOD = 50;
+    public static final long GAME_PERIOD = 50;
     public static final int MAX_COMMANDS = 10;
     public static final Dimension appSize = new Dimension(500, 500);
     public static final int BROADCAST_PERIOD = 1000;

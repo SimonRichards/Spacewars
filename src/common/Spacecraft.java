@@ -70,6 +70,11 @@ public abstract class Spacecraft extends Actor {
         timeTillCool = 0;
     }
 
+    /**
+     *
+     * @param pos
+     * @param vel
+     */
     public Spacecraft(Vector2d pos, Vector2d vel) {
         super(pos, vel);
         timeTillCool = 0;

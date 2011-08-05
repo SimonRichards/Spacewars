@@ -26,53 +26,27 @@ class ServerManager implements Runnable {
     private final CopyOnWriteArrayList<Connection.Server> servers;
     private int serverSelector;
     private int current;
-    private final int id;
-    private ArrayList<String> names;
+    private final int clientID;
+    private final Collection<String> names;
+    private final byte[] buffer;
+    private final DatagramPacket packet;
 
     /**
      * Connects to the local server joins the multicast group
      * @param port The local server's TCP port
-     * @param id The client's ID
+     * @param clientID The client's ID
      * @throws IOException if the UDP or TCP connections fail
      */
-    ServerManager(int port, int id) throws IOException {
+    ServerManager(final int port, final int clientID) throws IOException {
         servers = new CopyOnWriteArrayList<Server>();
-        servers.add(new Server(InetAddress.getLocalHost(), port, "My server", id));
+        servers.add(new Server(InetAddress.getLocalHost(), port, "My server", clientID));
         multiSocket = new MulticastSocket(Game.DEFAULT_UDP_PORT);
         multiSocket.joinGroup(InetAddress.getByName(Game.group));
-        this.id = id;
+        this.clientID = clientID;
         names = new ArrayList<String>(Game.MAX_SERVERS);
         names.add("My server");
-    }
-
-    /**
-     * Increments the users selection (of servers to hyperspace to). Skips the current
-     * server and does nothing if there are no more valid servers in that direction.
-     */
-    void incrementSelector() {
-        serverSelector = serverSelector == servers.size() - 1 ? servers.size() - 1 : serverSelector + 1;
-        if (serverSelector == current) {
-            if (current != servers.size() - 1) {
-                serverSelector += 1;
-            } else {
-                serverSelector -= 1;
-            }
-        }
-    }
-
-    /**
-     * Decrements the users selection (of servers to hyperspace to). Skips the current
-     * server and does nothing if there are no more valid servers in that direction.
-     */
-    void decrementSelector() {
-        serverSelector = serverSelector == 0 ? 0 : serverSelector - 1;
-        if (serverSelector == current) {
-            if (current != 0) {
-                serverSelector -= 1;
-            } else {
-                serverSelector += 1;
-            }
-        }
+        buffer = new byte[Game.UDP_PACKET_LENGTH];
+        packet = new DatagramPacket(buffer, Game.UDP_PACKET_LENGTH);
     }
 
     /**
@@ -89,7 +63,7 @@ class ServerManager implements Runnable {
      * @return Names of all collected servers
      */
     Collection<String> getNames() {
-        return Collections.unmodifiableList(names);
+        return Collections.unmodifiableCollection(names);
     }
 
     /**
@@ -115,7 +89,7 @@ class ServerManager implements Runnable {
     Server getCurrent() {
         if (servers.isEmpty()) {
             System.err.println("All server connections lost");
-            System.exit(0);
+            System.exit(-1);
         }
         for (Connection.Server server : servers) {
             if (!server.isAlive()) {
@@ -145,26 +119,26 @@ class ServerManager implements Runnable {
      * until one actually works.
      */
     void hyper() {
-            servers.get(current).leave();
-            int temp = current;
-            current = serverSelector;
-            serverSelector = temp;
-            try {
-                servers.get(current).join();
-            } catch (IOException e) {
-                // If this happens the client has attempted to
-                // join a server that disconnected very recently
-                current = 0;
-                while (true) {
-                    try {
+        servers.get(current).leave();
+        final int temp = current;
+        current = serverSelector;
+        serverSelector = temp;
+        try {
+            servers.get(current).join();
+        } catch (IOException e) {
+            // If this happens the client has attempted to
+            // join a server that disconnected very recently
+            current = 0;
+            while (true) {
+                try {
                     servers.remove(current);
                     servers.get(0).join();
                     break;
-                    } catch (IOException e2) {
-                        // restart loop
-                    }
+                } catch (IOException e2) {
+                    continue;
                 }
             }
+        }
     }
 
     /**
@@ -172,31 +146,37 @@ class ServerManager implements Runnable {
      */
     @Override
     public void run() {
+        int port;
         try {
-            byte[] buffer = new byte[Game.UDP_PACKET_LENGTH];
-            DatagramPacket packet = new DatagramPacket(buffer, Game.UDP_PACKET_LENGTH);
             while (true) {
                 boolean found = false;
 
+                // Block until a datagram is received
                 multiSocket.receive(packet);
+
+                // Decode the datagram
                 String[] data = new String(packet.getData()).split(" ");
                 String name = data[1].trim().concat("'s server");
-                int port = Integer.valueOf(data[0]);
+                port = Integer.valueOf(data[0]);
 
+                // Search for matching server and refresh its timeout counter
+                // if found
                 for (Server server : servers) {
                     if (server.is(packet.getAddress(), port)) {
                         server.heartbeat();
                         found = true;
+                        break;
                     }
                 }
 
+                // If it's a new server then add it to the pool
                 if (!found) {
                     if (servers.size() < Game.MAX_SERVERS) {
                         servers.add(new Server(
                                 packet.getAddress(),
                                 port,
                                 name,
-                                id));
+                                clientID));
                     }
                     names.add(name);
                 }
@@ -208,7 +188,7 @@ class ServerManager implements Runnable {
                     if (serverSelector > 0) {
                         serverSelector--;
                     } else if (serverSelector < servers.size()) {
-                        serverSelector ++;
+                        serverSelector++;
                     }
                 }
             }
@@ -224,5 +204,40 @@ class ServerManager implements Runnable {
      */
     void start() {
         new Thread(this).start();
+    }
+
+    /**
+     * Modifies the users selected server to hyperspace to. Skips the current
+     * server and does nothing if there are no more valid servers in that direction.
+     */
+    void selectServer(final int selectionChange) {
+        switch (selectionChange) {
+            case -1:
+                if (serverSelector > 0) {
+                    if (serverSelector == current + 1) {
+                        if (current > 0) {
+                            serverSelector -= 2;
+                        }
+                    } else {
+                        serverSelector -= 1;
+                    }
+                }
+                break;
+            case 1:
+                if (serverSelector < servers.size() - 1) {
+                    if (serverSelector == current - 1) {
+                        if (current < servers.size() - 1) {
+                            serverSelector += 2;
+                        }
+                    } else {
+                        serverSelector += 1;
+                    }
+                }
+                break;
+
+            default:
+                break;
+
+        }
     }
 }

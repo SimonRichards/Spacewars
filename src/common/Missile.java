@@ -66,6 +66,12 @@ public class Missile extends Actor {
         super.stepTime(); // Force a position update
     }
 
+    /**
+     * Reconstitutes a missile from an array of doubles and water
+     *
+     * @param id The unique identifier of this actor
+     * @param buffer An array of doubles, according to the network protocol
+     */
     Missile(int id, double[] buffer) {
         super(id, buffer);
         spriteGraphics.setColor(Color.getHSBColor((float)buffer[0], 1f, 1f));
