@@ -29,7 +29,6 @@ class Display extends Canvas {
     private final List<Actor> actors;
     private final List<String> serverNames;
     private int currentServer = 0;
-    private int selectedServer = 0;
     private final Collection<String> clientNames;
 
     /**
@@ -96,13 +95,8 @@ class Display extends Canvas {
             offgraphics.setColor(Color.RED);
             int i = 0;
             for (i = 0; i < serverNames.size(); i++) {
-                if (i == currentServer) {
-                    offgraphics.setPaint(Color.RED);
-                } else if (i == selectedServer) {
-                    offgraphics.setPaint(Color.YELLOW);
-                } else {
-                    offgraphics.setPaint(Color.WHITE);
-                }
+                final Color color = (i == currentServer) ? Color.RED : Color.WHITE;
+                offgraphics.setPaint(color);
                 offgraphics.drawString(serverNames.get(i), Game.appSize.width - 100, 20 * i + 10);
             }
 
@@ -124,9 +118,8 @@ class Display extends Canvas {
      * @param current The server to highlight as being the current server
      * @param selected The server to highlight as being the next hyperspace target
      */
-    synchronized void setServerNames(Collection<String> servers, int current, int selected) {
+    synchronized void setServerNames(Collection<String> servers, int current) {
         currentServer = current;
-        selectedServer = selected;
         serverNames.clear();
         serverNames.addAll(servers);
     }

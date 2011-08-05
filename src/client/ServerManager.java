@@ -10,6 +10,7 @@ import java.net.MulticastSocket;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -24,12 +25,12 @@ class ServerManager implements Runnable {
 
     private final MulticastSocket multiSocket;
     private final CopyOnWriteArrayList<Connection.Server> servers;
-    private int serverSelector;
     private int current;
     private final int clientID;
     private final Collection<String> names;
     private final byte[] buffer;
     private final DatagramPacket packet;
+    private final Random rand;
 
     /**
      * Connects to the local server joins the multicast group
@@ -47,6 +48,7 @@ class ServerManager implements Runnable {
         names.add("My server");
         buffer = new byte[Game.UDP_PACKET_LENGTH];
         packet = new DatagramPacket(buffer, Game.UDP_PACKET_LENGTH);
+        rand = new Random();
     }
 
     /**
@@ -70,16 +72,8 @@ class ServerManager implements Runnable {
      * for use with the above method
      * @return The index of the current server
      */
-    int getIndex() {
+    int getCurrentIndex() {
         return current;
-    }
-
-    /**
-     * for use with the above methods
-     * @return The index of the currently selected server
-     */
-    int getSelector() {
-        return serverSelector;
     }
 
     /**
@@ -103,13 +97,6 @@ class ServerManager implements Runnable {
         return servers.get(current);
     }
 
-    /**
-     * @return True if a hyperspace jump is available, false otherwise
-     * Please call before hyper()
-     */
-    boolean canHyper() {
-        return current != serverSelector;
-    }
 
     /**
      * Leaves the current server and joins the next selected one.
@@ -118,27 +105,39 @@ class ServerManager implements Runnable {
      * care of server failure itself and repeatedly join servers
      * until one actually works.
      */
-    void hyper() {
-        servers.get(current).leave();
-        final int temp = current;
-        current = serverSelector;
-        serverSelector = temp;
-        try {
-            servers.get(current).join();
-        } catch (IOException e) {
-            // If this happens the client has attempted to
-            // join a server that disconnected very recently
-            current = 0;
-            while (true) {
-                try {
-                    servers.remove(current);
-                    servers.get(0).join();
-                    break;
-                } catch (IOException e2) {
-                    continue;
+    boolean hyper() {
+        System.out.println("starting");
+        boolean result = true;
+        if (servers.size() <= 1) {
+            result = false;
+        } else {
+            servers.get(current).leave();
+            final int temp = current;
+            do {
+                current = rand.nextInt(servers.size());
+            } while (current == temp);
+
+            try {
+                servers.get(current).join();
+            } catch (IOException e) {
+                System.err.println("Couldn't hyper to new server");
+                // If this happens the client has attempted to
+                // join a server that disconnected very recently
+                current = 0;
+                while (true) {
+                    try {
+                        servers.remove(current);
+                        servers.get(0).join();
+                        break;
+                    } catch (IOException e2) {
+                        System.err.println("failed to join server");
+                        continue;
+                    }
                 }
             }
         }
+        System.out.println("finished");
+        return result;
     }
 
     /**
@@ -147,16 +146,19 @@ class ServerManager implements Runnable {
     @Override
     public void run() {
         int port;
+        boolean found;
+        String name;
+        String[] data;
         try {
             while (true) {
-                boolean found = false;
+                found = false;
 
                 // Block until a datagram is received
                 multiSocket.receive(packet);
 
                 // Decode the datagram
-                String[] data = new String(packet.getData()).split(" ");
-                String name = data[1].trim().concat("'s server");
+                data = new String(packet.getData()).split(" ");
+                name = data[1].trim().concat("'s server");
                 port = Integer.valueOf(data[0]);
 
                 // Search for matching server and refresh its timeout counter
@@ -180,16 +182,10 @@ class ServerManager implements Runnable {
                     }
                     names.add(name);
                 }
+
+                // Clear the buffer
                 for (int i = 0; i < buffer.length; i++) {
                     buffer[i] = 0;
-                }
-
-                if (current == serverSelector && servers.size() > 1) {
-                    if (serverSelector > 0) {
-                        serverSelector--;
-                    } else if (serverSelector < servers.size()) {
-                        serverSelector++;
-                    }
                 }
             }
 
@@ -204,40 +200,5 @@ class ServerManager implements Runnable {
      */
     void start() {
         new Thread(this).start();
-    }
-
-    /**
-     * Modifies the users selected server to hyperspace to. Skips the current
-     * server and does nothing if there are no more valid servers in that direction.
-     */
-    void selectServer(final int selectionChange) {
-        switch (selectionChange) {
-            case -1:
-                if (serverSelector > 0) {
-                    if (serverSelector == current + 1) {
-                        if (current > 0) {
-                            serverSelector -= 2;
-                        }
-                    } else {
-                        serverSelector -= 1;
-                    }
-                }
-                break;
-            case 1:
-                if (serverSelector < servers.size() - 1) {
-                    if (serverSelector == current - 1) {
-                        if (current < servers.size() - 1) {
-                            serverSelector += 2;
-                        }
-                    } else {
-                        serverSelector += 1;
-                    }
-                }
-                break;
-
-            default:
-                break;
-
-        }
     }
 }

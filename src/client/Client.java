@@ -69,7 +69,6 @@ public class Client implements Runnable {
             try {
                 server = serverManager.getCurrent();
                 handleCommands(input.read());
-                serverManager.selectServer(input.getSelectionChange());
                 receiveState();
                 updateDisplay();
             } catch (IOException e) {
@@ -93,12 +92,12 @@ public class Client implements Runnable {
 
 
         // Handle hyperspace requests
-        if (commands.contains(Command.HYPERSPACE)) {
-            if (hyperCoolDown == 0 && serverManager.canHyper()) {
-                currentActors.clear();
-                hyperCoolDown = HYPERPERIOD;
-                serverManager.hyper();
-            }
+        if (commands.contains(Command.HYPERSPACE) &&
+                hyperCoolDown == 0 &&
+                serverManager.hyper()) {
+            currentActors.clear();
+            hyperCoolDown = HYPERPERIOD;
+
             // Do not send the hyperspace command to the server (ever)
             commands.remove(Command.HYPERSPACE);
         }
@@ -134,8 +133,7 @@ public class Client implements Runnable {
     private void updateDisplay() {
         display.setServerNames(
                 serverManager.getNames(),
-                serverManager.getIndex(),
-                serverManager.getSelector());
+                serverManager.getCurrentIndex());
 
         display.setClientNames(clientNames);
         clientNames.clear();

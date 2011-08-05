@@ -15,9 +15,6 @@ import java.util.Map;
 class InputHandler extends KeyAdapter {
     private final Map<Integer,Command> commandFromKey;
     private final EnumSet<Command> commands;
-    private int selectionChange;
-    private boolean upHeld = false;
-    private boolean downHeld = false;
 
     /**
      * Maps keys to commands and instantiates containers
@@ -48,14 +45,6 @@ class InputHandler extends KeyAdapter {
      * @param k the keystroke
      */
     public synchronized void keyPressed(KeyEvent key) {
-        if (!upHeld && key.getKeyCode() == KeyEvent.VK_UP){
-            selectionChange = -1;
-            upHeld = true;
-        } else if (!downHeld && key.getKeyCode() == KeyEvent.VK_DOWN) {
-            selectionChange = 1;
-            downHeld = true;
-        }
-
         if (commandFromKey.containsKey(key.getKeyCode())) {
             commands.add(commandFromKey.get(key.getKeyCode()));
         }
@@ -71,23 +60,5 @@ class InputHandler extends KeyAdapter {
         if (commandFromKey.containsKey(key.getKeyCode())) {
             commands.remove(commandFromKey.get(key.getKeyCode()));
         }
-
-        if (key.getKeyCode() == KeyEvent.VK_UP){
-            upHeld = false;
-        } else if (key.getKeyCode() == KeyEvent.VK_DOWN) {
-            downHeld = false;
-        }
-
     }
-
-    /**
-     * Retrieves the user's server selection requests, once per press.
-     * @return +1 if the user has pressed down, -1 for up and 0 otherwise
-     */
-    synchronized int getSelectionChange() {
-        final int temp = selectionChange;
-        selectionChange = 0;
-        return temp;
-    }
-
 }
