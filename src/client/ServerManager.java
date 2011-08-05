@@ -10,7 +10,7 @@ import java.net.MulticastSocket;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Random;
+import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -21,10 +21,10 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * array mutation (when servers start or stop broadcasting).
  * @author Simon, Daniel
  */
-class ServerManager implements Runnable {
+class ServerManager extends Thread {
 
     private final MulticastSocket multiSocket;
-    private final CopyOnWriteArrayList<Connection.Server> servers;
+    private final List<Connection.Server> servers;
     private int current;
     private final int clientID;
     private final Collection<String> names;
@@ -38,6 +38,7 @@ class ServerManager implements Runnable {
      * @throws IOException if the UDP or TCP connections fail
      */
     ServerManager(final int port, final int clientID) throws IOException {
+        super();
         servers = new CopyOnWriteArrayList<Server>();
         servers.add(new Server(InetAddress.getLocalHost(), port, "My server", clientID));
         multiSocket = new MulticastSocket(Game.DEFAULT_UDP_PORT);
@@ -182,6 +183,7 @@ class ServerManager implements Runnable {
                 // Clear the buffer
                 for (int i = 0; i < buffer.length; i++) {
                     buffer[i] = 0;
+
                 }
             }
 
@@ -189,12 +191,5 @@ class ServerManager implements Runnable {
             System.err.println(e.getMessage());
             System.exit(-1);
         }
-    }
-
-    /**
-     * Starts this ServerManager object running, for convenience only
-     */
-    void start() {
-        new Thread(this).start();
     }
 }

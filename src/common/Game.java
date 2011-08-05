@@ -42,7 +42,7 @@ public class Game {
 
         try {
             Server.start(tcpPort, headless);
-            if (!headless) Client.start(tcpPort);
+            if (!headless) new Client(tcpPort).start();
 
         } catch (IOException e) {
             System.err.println("No network connection found");

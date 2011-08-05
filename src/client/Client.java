@@ -18,7 +18,7 @@ import java.util.Random;
  * a ServerManager object to track all servers that the client is connected to.
  * @author Simon, Daniel
  */
-public class Client implements Runnable {
+public class Client extends Thread {
 
     private final InputHandler input;
     private final Display display;
@@ -32,31 +32,21 @@ public class Client implements Runnable {
     private Server server;
 
     /**
-     * Starts up a client in its own thread, blocks until server is found.
-     * @param tcpPort The port on which to connect to the local server
-     * @throws IOException If the local server cannot be found
-     */
-    public static void start(final int tcpPort) throws IOException {
-        new Thread(new Client(tcpPort)).start();
-    }
-
-    /**
      * Creates a new Client which blocks until the local
      * server is found.
      *
      * @param port The TCP/IP port to find the local server on
      * @throws IOException if there is an error in the TCP protocol
      */
-    Client(final int port) throws IOException {
+    public Client(final int port) throws IOException {
+        super();
         serverManager = new ServerManager(port, Game.rand.nextInt());
-        serverManager.start();
         input = new InputHandler();
         currentActors = new HashMap<Integer, Actor>(50);
         nextActors = new HashMap<Integer, Actor>(50);
         display = new Display(Game.APPSIZE, input);
         actorBuffer = new double[Actor.NUM_ELEMENTS];
         clientNames = new LinkedList<String>();
-        server = serverManager.getCurrent();
     }
 
     /**
@@ -64,6 +54,8 @@ public class Client implements Runnable {
      */
     @Override
     public void run() {
+        serverManager.start();
+        server = serverManager.getCurrent();
         while (true) {
             try {
                 handleCommands(input.read());
@@ -72,6 +64,7 @@ public class Client implements Runnable {
                 updateDisplay();
             } catch (IOException e) {
                 e.printStackTrace();
+                System.out.println("current server failed");
                 serverManager.removeCurrent();
                 continue;
             }
