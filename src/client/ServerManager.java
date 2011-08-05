@@ -14,7 +14,7 @@ import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * A ServerManager joins the multicast group and tracks currently available servers.
+ * A ServerManager joins the multicast MULTICAST_GROUP and tracks currently available servers.
  * New servers are added to the clients list and old servers are refreshed so that
  * unresponsive ones may be cleared out. Servers are collected in a copy on write
  * array to allow fast asynchronous access to array elements and the occasional
@@ -33,7 +33,7 @@ class ServerManager implements Runnable {
     private final Random rand;
 
     /**
-     * Connects to the local server joins the multicast group
+     * Connects to the local server joins the multicast MULTICAST_GROUP
      * @param port The local server's TCP port
      * @param clientID The client's ID
      * @throws IOException if the UDP or TCP connections fail
@@ -42,7 +42,7 @@ class ServerManager implements Runnable {
         servers = new CopyOnWriteArrayList<Server>();
         servers.add(new Server(InetAddress.getLocalHost(), port, "My server", clientID));
         multiSocket = new MulticastSocket(Game.DEFAULT_UDP_PORT);
-        multiSocket.joinGroup(InetAddress.getByName(Game.group));
+        multiSocket.joinGroup(InetAddress.getByName(Game.MULTICAST_GROUP));
         this.clientID = clientID;
         names = new ArrayList<String>(Game.MAX_SERVERS);
         names.add("My server");
@@ -97,7 +97,6 @@ class ServerManager implements Runnable {
         return servers.get(current);
     }
 
-
     /**
      * Leaves the current server and joins the next selected one.
      * As the only connection reliant method that does not throw
@@ -110,6 +109,7 @@ class ServerManager implements Runnable {
         boolean result = true;
         if (servers.size() <= 1) {
             result = false;
+            System.out.println("not enough servers");
         } else {
             servers.get(current).leave();
             final int temp = current;
@@ -119,6 +119,7 @@ class ServerManager implements Runnable {
 
             try {
                 servers.get(current).join();
+                System.out.println("successful hyperspace jump");
             } catch (IOException e) {
                 System.err.println("Couldn't hyper to new server");
                 // If this happens the client has attempted to

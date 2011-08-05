@@ -40,17 +40,17 @@ class Display extends Canvas {
     Display(final Dimension size, final KeyListener listener) {
         super();
         actors = new LinkedList<Actor>();
-        serverNames = new ArrayList<String>(Game.appSize.height / VERT_TEXT_INCR);
-        clientNames = new ArrayList<String>(Game.appSize.height / VERT_TEXT_INCR);
-        setPreferredSize(Game.appSize);
-        setMinimumSize(Game.appSize);
-        setMaximumSize(Game.appSize);
+        serverNames = new ArrayList<String>(Game.APPSIZE.height / VERT_TEXT_INCR);
+        clientNames = new ArrayList<String>(Game.APPSIZE.height / VERT_TEXT_INCR);
+        setPreferredSize(Game.APPSIZE);
+        setMinimumSize(Game.APPSIZE);
+        setMaximumSize(Game.APPSIZE);
         offscreen = new BufferedImage(size.width, size.height,
                 BufferedImage.TYPE_INT_ARGB);
         offgraphics = offscreen.createGraphics();
         final JFrame frame = new JFrame(APPNAME);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(Game.appSize);
+        frame.setSize(Game.APPSIZE);
         frame.setResizable(false);
         frame.addKeyListener(listener);
         this.addKeyListener(listener);
@@ -97,7 +97,7 @@ class Display extends Canvas {
             for (i = 0; i < serverNames.size(); i++) {
                 final Color color = (i == currentServer) ? Color.RED : Color.WHITE;
                 offgraphics.setPaint(color);
-                offgraphics.drawString(serverNames.get(i), Game.appSize.width - 100, 20 * i + 10);
+                offgraphics.drawString(serverNames.get(i), Game.APPSIZE.width - 100, 20 * i + 10);
             }
 
             offgraphics.setPaint(Color.WHITE);

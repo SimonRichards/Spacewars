@@ -50,7 +50,7 @@ public abstract class Spacecraft extends Actor {
 
     /**
      * Rebuilds a Spacecraft from a buffer
-     * @param id The id of the new spacecraft
+     * @param actorID The actorID of the new spacecraft
      * @param buffer The buffer to build from
      */
     Spacecraft(int id, double[] buffer) {

@@ -6,7 +6,7 @@ import javax.vecmath.Vector2d;
 
 /**
  * A star is a large gravitating object that twinkles. Stars cannot be
- * damaged, destroyed, or moved.
+ * damaged or destroyed.
  *
  * @author AIM, Simon, Daniel
  */
@@ -69,18 +69,10 @@ public class Star extends Actor  {
 
     /**
      * @inheritDoc
-     * Used for animation purposes only
      */
     @Override
     public void stepTime() {
-        // Even though ships are defined as having effectively zero mass,
-        // we *ensure* that a star remains fixed by disabling position
-        // updates. This avoids any problems with numerical rounding
-        // errors. A more realistic model might allow stars to influence
-        // each other. This is easily achieved by inserting a call to
         super.stepTime();
-
-        // Although stars can't move, but rotating them gives a twinkle
         this.rotate(Math.PI/4.0);
     }
 

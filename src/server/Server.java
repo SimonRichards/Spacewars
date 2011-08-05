@@ -25,15 +25,15 @@ public class Server extends TimerTask {
 
     private final Collection<Connection.Client> clients;
     private Connection.Client localClient;
-    private GameEngine engine;
+    private final GameEngine engine;
     private final Map<Connection.Client, Spacecraft> spacecraftFromClient;
     private static final int MAX_CLIENTS = 10;
-    private boolean standalone;
+    private final boolean standalone;
     private boolean firstTime;
     private final int port;
     private final ClientListener listener;
-    private int[] commandBuffer;
-    private double[] actorBuffer;
+    private final int[] commandBuffer;
+    private final double[] actorBuffer;
 
 
     /**
@@ -42,7 +42,7 @@ public class Server extends TimerTask {
      * @param headless Whether or not to crete the server standalone
      * @throws IOException If the socket cannot be bound to
      */
-    public static void start(int tcpPort, boolean headless) throws IOException{
+    public static void start(final int tcpPort, final boolean headless) throws IOException{
         new Timer().scheduleAtFixedRate(new Server(tcpPort, headless), 0, Game.GAME_PERIOD);
     }
 
@@ -52,9 +52,9 @@ public class Server extends TimerTask {
      * @param standalone
      * @throws IOException if the Server cannot be created
      */
-    private Server(int port, boolean standalone) throws IOException {
+    private Server(final int port, final boolean standalone) throws IOException {
         super();
-        commandBuffer = new int[Game.MAX_COMMANDS];
+        commandBuffer = new int[Game.COMMAND_BUFFER_SIZE];
         actorBuffer = new double[Actor.NUM_ELEMENTS];
         engine = new GameEngine();
         clients = new LinkedList<Connection.Client>();
@@ -80,11 +80,13 @@ public class Server extends TimerTask {
         }
 
         // Receive command sets from all clients
+        Command input;
+        int numCommands;
         for (Connection.Client client : clients) {
             try {
-                int numCommands = client.getCommands(commandBuffer);
+                numCommands = client.getCommands(commandBuffer);
                 for (int i = 0; i < numCommands; i++) {
-                    Command input = Command.fromInt(Integer.valueOf(commandBuffer[i]));
+                    input = Command.fromInt(Integer.valueOf(commandBuffer[i]));
                     // Apply the command
                     switch (input) {
                         case EXIT:
@@ -97,9 +99,8 @@ public class Server extends TimerTask {
                             }
                             break;
                         default:
-                            Spacecraft sc = spacecraftFromClient.get(client);
-                            if (sc != null) {
-                                handleCommand(sc, input);
+                            if (spacecraftFromClient.get(client) != null) {
+                                handleCommand(spacecraftFromClient.get(client), input);
                             }
                     }
                 }
@@ -139,7 +140,7 @@ public class Server extends TimerTask {
         }
 
         // Ask out client listener if a new client is ready and add if so
-        Connection.Client client = listener.getNewClient();
+        final Connection.Client client = listener.getNewClient();
         if (client != null) {
             clients.add(client);
         }
@@ -151,7 +152,7 @@ public class Server extends TimerTask {
      * @param spacecraft The spacecraft to apply the command to
      * @param input The command sent by the client
      */
-    private void handleCommand(Spacecraft spacecraft, Command input) {
+    private void handleCommand(final Spacecraft spacecraft, final Command input) {
         switch (input) {
             case FORWARD:
                 spacecraft.accelerate(0.5);
@@ -182,7 +183,7 @@ public class Server extends TimerTask {
      * to the client in the spacecraftFromClient map.
      * @param client The client to map to
      */
-    private void addActorfromClient(Connection.Client client) {
+    private void addActorfromClient(final Connection.Client client) {
         spacecraftFromClient.put(client, engine.addSpaceship(client.getID()));
     }
 
@@ -190,8 +191,8 @@ public class Server extends TimerTask {
      * Removes the client and their
      * @param client
      */
-    private void removeClient(Client client) {
-        Actor clientActor = spacecraftFromClient.get(client);
+    private void removeClient(final Client client) {
+        final Actor clientActor = spacecraftFromClient.get(client);
         if (clientActor != null) {
             clientActor.destroy();
         }

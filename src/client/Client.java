@@ -25,7 +25,6 @@ public class Client implements Runnable {
     private Map<Integer, Actor> currentActors;
     private Map<Integer, Actor> nextActors;
     private final double[] actorBuffer;
-    private final int clientID;
     private int hyperCoolDown;
     private static final int HYPERPERIOD = 5;
     private final ServerManager serverManager;
@@ -49,13 +48,12 @@ public class Client implements Runnable {
      * @throws IOException if there is an error in the TCP protocol
      */
     Client(final int port) throws IOException {
-        clientID = new Random().nextInt();
-        serverManager = new ServerManager(port, clientID);
+        serverManager = new ServerManager(port, new Random().nextInt());
         serverManager.start();
         input = new InputHandler();
         currentActors = new HashMap<Integer, Actor>(50);
         nextActors = new HashMap<Integer, Actor>(50);
-        display = new Display(Game.appSize, input);
+        display = new Display(Game.APPSIZE, input);
         actorBuffer = new double[Actor.NUM_ELEMENTS];
         clientNames = new LinkedList<String>();
     }
@@ -78,6 +76,12 @@ public class Client implements Runnable {
         }
     }
 
+    /**
+     * Sends commands onto the current server after giving special handling to
+     * EXIT and HYPERSPACE
+     * @param commands The current command set
+     * @throws IOException if the server cannot be contacted
+     */
     private void handleCommands(final EnumSet<Command> commands) throws IOException {
         if (commands.contains(Command.EXIT)) {
             System.exit(0);
@@ -98,6 +102,12 @@ public class Client implements Runnable {
         server.send(commands);
     }
 
+
+    /**
+     * Retrieves headers and actor streams from the connection to
+     * the current server
+     * @throws IOException If there is a communication failure
+     */
     private void receiveState() throws IOException {
         final int numActors = server.receiveHeaders(clientNames);
         for (int i = 0; i < numActors; i++) {
@@ -110,8 +120,13 @@ public class Client implements Runnable {
                 nextActors.put(actorID, Actor.fromBuffer(type, actorID, actorBuffer));
             }
         }
+    }
 
-        // Push the actors into the display
+    /**
+     * Loads the current game state into the display
+     * and requests a repaint.
+     */
+    private void updateDisplay() {
         display.loadActors(nextActors.values());
         final Map<Integer, Actor> temp = currentActors;
 
@@ -119,9 +134,6 @@ public class Client implements Runnable {
         currentActors = nextActors;
         nextActors = temp;
         nextActors.clear();
-    }
-
-    private void updateDisplay() {
         display.setServerNames(
                 serverManager.getNames(),
                 serverManager.getCurrentIndex());

@@ -36,8 +36,8 @@ public abstract class Connection {
      * Connection.Client encapsulates the server's communication with a client
      */
     public static class Client extends Connection {
-        private static final int MAX_NAME_LENGTH = 20;
 
+        private static final int MAX_NAME_LENGTH = 20;
         private int id;
 
         /**
@@ -78,7 +78,7 @@ public abstract class Connection {
             int i = 0;
             while (in.available() > 0) {
                 commandBuffer[i++] = in.readInt();
-                if (i == Game.MAX_COMMANDS) {
+                if (i == Game.COMMAND_BUFFER_SIZE) {
                     System.err.println("too many commands received");
                     break;
                 }
@@ -130,7 +130,6 @@ public abstract class Connection {
         }
     }
 
-
     /**
      * Encapsulates how a client sees a server and handles all data
      * transmission and reception.
@@ -151,12 +150,12 @@ public abstract class Connection {
          */
         public Server(InetAddress host, int port, String name, int id) throws IOException {
             this.name = name;
-            actorList = new ArrayList<Integer>(Game.popcap);
+            actorList = new ArrayList<Integer>(Game.POPCAP);
             socket = new Socket(host, port);
             out = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
             in = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
             out.writeInt(id);
-            out.writeChars(System.getProperty("user.name")+'\n');
+            out.writeChars(System.getProperty("user.name") + '\n');
             socket.setSoTimeout(1000);
             socket.setTcpNoDelay(true);
             lastRefreshed = System.currentTimeMillis();
@@ -172,20 +171,11 @@ public abstract class Connection {
         public boolean is(InetAddress address, int port) {
             //TODO: port is used as an ad-hoc server unique identifier as other
             // techniques failed on different networks.
-            if (socket.getPort() == port) {
-                return true;
-            } else {
-                return false;
-            }
-            /*
-             * Here's the old code which was previously used in addition to port matching:
-             * socket.getLocalAddress().getHostAddress().equals(address.getHostAddress()) ||
-             * (address.getHostAddress().equals(socket.getInetAddress().getHostAddress())
-             */
+            return (socket.getPort() == port);
         }
 
         /**
-         * Sends a group of commands by their ordinal values
+         * Sends a MULTICAST_GROUP of commands by their ordinal values
          * @param commands The command set to send
          * @throws IOException if the link to the server was lost
          */
@@ -287,6 +277,4 @@ public abstract class Connection {
         super.finalize();
         socket.close();
     }
-
-
 }

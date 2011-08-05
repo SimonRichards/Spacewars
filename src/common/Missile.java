@@ -69,7 +69,7 @@ public class Missile extends Actor {
     /**
      * Reconstitutes a missile from an array of doubles and water
      *
-     * @param id The unique identifier of this actor
+     * @param actorID The unique identifier of this actor
      * @param buffer An array of doubles, according to the network protocol
      */
     Missile(int id, double[] buffer) {
@@ -91,16 +91,25 @@ public class Missile extends Actor {
         }
     }
 
+    /**
+     * @inheritDoc
+     */
     @Override
     public double getMaxVel(){
         return MAX_MISSLE_VEL;
     }
 
+    /**
+     * @inheritDoc
+     */
     @Override
     public int getActorType() {
         return ActorType.MISSILE.ordinal();
     }
 
+    /**
+     * @inheritDoc
+     */
     @Override
     public int getCollisionDamage() {
         return MISSILE_CRASH_EFFECT;

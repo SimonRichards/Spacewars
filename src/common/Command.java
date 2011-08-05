@@ -1,7 +1,9 @@
 package common;
 
 /**
- *
+ * The set of keyboard commands a client uses.
+ * The set of commands used to operate a
+ * spaceship is a subset of this enum.
  * @author Simon, Daniel
  */
 public enum Command {
@@ -13,13 +15,14 @@ public enum Command {
     HYPERSPACE,
     ENTRY;
 
-    public static Command fromInt(int a) {
-        Command command = null;
-        for(Command c : Command.values()){
-            if(c.ordinal() == a){
-                command = c;
+    public static Command fromInt(int index) {
+        Command result = null;
+        for(Command command : Command.values()){
+            if(command.ordinal() == index){
+                result = command;
+                break;
             }
         }
-        return command;
+        return result;
     }
 }

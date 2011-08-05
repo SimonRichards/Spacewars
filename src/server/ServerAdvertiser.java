@@ -10,7 +10,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 /**
- * A server advertiser periodically sends Datagrams to the Multicast group defined in Game.
+ * A server advertiser periodically sends Datagrams to the Multicast MULTICAST_GROUP defined in Game.
  * These packet contain the host's user name (for identification) and the TCP port which
  * the server is bound to. The client may determine the host's address by inspecting the packet.
  * @author Simon, Daniel
@@ -32,7 +32,7 @@ class ServerAdvertiser extends TimerTask {
         length = name.length() > Game.UDP_PACKET_LENGTH ? Game.UDP_PACKET_LENGTH : name.length();
         buffer = name.substring(0, length).getBytes();
         socket = new DatagramSocket();
-        packet = new DatagramPacket(buffer, length, InetAddress.getByName(Game.group), Game.DEFAULT_UDP_PORT);
+        packet = new DatagramPacket(buffer, length, InetAddress.getByName(Game.MULTICAST_GROUP), Game.DEFAULT_UDP_PORT);
     }
 
     /**
