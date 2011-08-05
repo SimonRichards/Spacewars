@@ -1,0 +1,7 @@
+<Project projectName="spacewars">
+  <Jar>D:\Users\Simon\Documents\team-ramrod\build\classes</Jar>
+  <SrcDir>D:\Users\Simon\Documents\team-ramrod\src</SrcDir>
+  <SuppressionFilter>
+    <LastVersion value="-1" relOp="NEQ"/>
+  </SuppressionFilter>
+</Project>

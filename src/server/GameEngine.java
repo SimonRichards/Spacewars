@@ -5,7 +5,6 @@ import common.Star;
 import common.Actor;
 import common.Game;
 import java.util.ArrayList;
-import java.util.Random;
 import javax.vecmath.Vector2d;
 
 
@@ -22,18 +21,15 @@ class GameEngine {
     private final static double TIGHT_STAR_VEL = 2;
     private final static double TIGHT_STAR_DIST = 100;
 
-    private Random rand;
-
     /**
      * Adds the default actors to a new GameEngine
      */
     GameEngine() {
-        rand = new Random();
         actors = new ArrayList<Actor>(Game.POPCAP); //NB: Pop cap not actually enforced
 
         // Add the star(s)
-        final Vector2d starPos = new Vector2d(0.25*Game.APPSIZE.width*(1 + 2*rand.nextDouble()),
-                0.25*Game.APPSIZE.height*(1 + 2*rand.nextDouble()));
+        final Vector2d starPos = new Vector2d(0.25*Game.APPSIZE.width*(1 + 2*Game.rand.nextDouble()),
+                0.25*Game.APPSIZE.height*(1 + 2*Game.rand.nextDouble()));
         Star firstStar = new Star(starPos);
         actors.add(firstStar);
 
@@ -41,15 +37,15 @@ class GameEngine {
         // Distances and velocities for binary stars were not found with maths, changing anything
         // Including the appsize, will necessitate disabling this feature
         double star_dist, star_vel;
-        if (rand.nextBoolean()) {
+        if (Game.rand.nextBoolean()) {
             // Place the left star in the left side of the screen
-            final double x = rand.nextDouble()*Game.APPSIZE.width/2;
+            final double x = Game.rand.nextDouble()*Game.APPSIZE.width/2;
             // And in the central half of the y axis
-            final double y = (2*rand.nextDouble()*Game.APPSIZE.height + Game.APPSIZE.height) / 4;
+            final double y = (2*Game.rand.nextDouble()*Game.APPSIZE.height + Game.APPSIZE.height) / 4;
             firstStar.setPosition(new Vector2d(x,y));
 
             // 50/50 split on the binary stars' initial separation
-            if (rand.nextBoolean()) {
+            if (Game.rand.nextBoolean()) {
                 star_dist = WIDE_STAR_DIST;
                 star_vel = WIDE_STAR_VEL;
             } else {
@@ -76,10 +72,10 @@ class GameEngine {
      * @return actor The new actor (which has already been added to the actor collection
      */
     Spacecraft addSpaceship(int id) {
-        final Vector2d position = new Vector2d(rand.nextInt(Game.APPSIZE.width),rand.nextInt(Game.APPSIZE.height));
-        final Vector2d velocity = new Vector2d(10*(rand.nextDouble()-0.5),10*(rand.nextDouble()-0.5));
+        final Vector2d position = new Vector2d(Game.rand.nextInt(Game.APPSIZE.width),Game.rand.nextInt(Game.APPSIZE.height));
+        final Vector2d velocity = new Vector2d(10*(Game.rand.nextDouble()-0.5),10*(Game.rand.nextDouble()-0.5));
         final Spacecraft newActor = new Spacecraft.Wedge(id, position, velocity);
-        newActor.rotate(rand.nextDouble()*Math.PI*2);
+        newActor.rotate(Game.rand.nextDouble()*Math.PI*2);
         actors.add(newActor);
         return newActor;
     }

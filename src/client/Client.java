@@ -48,7 +48,7 @@ public class Client implements Runnable {
      * @throws IOException if there is an error in the TCP protocol
      */
     Client(final int port) throws IOException {
-        serverManager = new ServerManager(port, new Random().nextInt());
+        serverManager = new ServerManager(port, Game.rand.nextInt());
         serverManager.start();
         input = new InputHandler();
         currentActors = new HashMap<Integer, Actor>(50);

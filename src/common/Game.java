@@ -28,6 +28,7 @@ public class Game {
     public static final String MULTICAST_GROUP = "227.0.113.0";
     public static final int MIN_PORT = 1024;
     public static final int MAX_PORT = 65536;
+    public static final Random rand = new Random(System.currentTimeMillis());
 
     /**
      * Program entry point creates a new client and server.

@@ -30,7 +30,6 @@ class ServerManager implements Runnable {
     private final Collection<String> names;
     private final byte[] buffer;
     private final DatagramPacket packet;
-    private final Random rand;
 
     /**
      * Connects to the local server joins the multicast MULTICAST_GROUP
@@ -48,7 +47,6 @@ class ServerManager implements Runnable {
         names.add("My server");
         buffer = new byte[Game.UDP_PACKET_LENGTH];
         packet = new DatagramPacket(buffer, Game.UDP_PACKET_LENGTH);
-        rand = new Random();
     }
 
     /**
@@ -113,7 +111,7 @@ class ServerManager implements Runnable {
             servers.get(current).leave();
             final int temp = current;
             do {
-                current = rand.nextInt(servers.size());
+                current = Game.rand.nextInt(servers.size());
             } while (current == temp);
 
             try {
