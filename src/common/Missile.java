@@ -24,7 +24,7 @@ public class Missile extends Actor {
     private static final double IMPULSE = 10.0;
     // The distance from the spacecraft the missile has to be before it becomes
     // active
-    private static final double IGNITION_DISTANCE = 20.0;
+    private static final double IGNITION_DISTANCE = 30.0;
 
     // The number of time-steps the missile will stay active.
     private static final int INIT_LIFE = 50;

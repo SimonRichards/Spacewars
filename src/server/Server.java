@@ -40,7 +40,7 @@ public class Server extends TimerTask {
     /**
      * Starts a new Server object and schedules its loop for periodic execution
      * @param tcpPort The port to use
-     * @param headless Whether or not to crete the server standalone
+     * @param headless Whether or not to create the server standalone
      * @throws IOException If the socket cannot be bound to
      */
     public static void start(final int tcpPort, final boolean headless) throws IOException {
@@ -77,8 +77,10 @@ public class Server extends TimerTask {
 
         handleClientRequests();
 
-        for (Command command : engine.aiActor.update(engine.actors)) {
-            handleCommand(engine.aiActor, command);
+        if(!engine.aiActor.isDead()){
+            for (Command command : engine.aiActor.update(engine.actors)) {
+                handleCommand(engine.aiActor, command);
+            }
         }
 
         engine.stepTime();
