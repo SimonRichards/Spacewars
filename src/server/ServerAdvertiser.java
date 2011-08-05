@@ -5,9 +5,12 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A server advertiser periodically sends Datagrams to the Multicast MULTICAST_GROUP defined in Game.
@@ -17,22 +20,26 @@ import java.util.TimerTask;
  */
 class ServerAdvertiser extends TimerTask {
 
-    private final DatagramSocket socket;
-    private final DatagramPacket packet;
-
+    private DatagramSocket socket = null;
+    private DatagramPacket packet = null;
 
     /**
      * Creates the message to send and instantiates the Socket and Packet objects
      * @param tcpPort The port which the TCP based server is bound to
      * @throws IOException If the socket or packet fail to find the host
      */
-    ServerAdvertiser(final int tcpPort) throws IOException {
+    ServerAdvertiser(final int tcpPort) {
         super();
         final String name = tcpPort + " " + System.getProperty("user.name");
         int length = name.length() > Game.UDP_PACKET_LENGTH ? Game.UDP_PACKET_LENGTH : name.length();
         byte[] buffer = name.substring(0, length).getBytes();
-        socket = new DatagramSocket();
-        packet = new DatagramPacket(buffer, length, InetAddress.getByName(Game.MULTICAST_GROUP), Game.DEFAULT_UDP_PORT);
+        try {
+            socket = new DatagramSocket();
+            packet = new DatagramPacket(buffer, length, InetAddress.getByName(Game.MULTICAST_GROUP), Game.DEFAULT_UDP_PORT);
+        } catch (IOException e) {
+            System.err.println("Could not start UDP service");
+            System.exit(-1);
+        }
 
         // Start the service
         new Timer("Broadcaster", true).scheduleAtFixedRate(this, 0, Game.BROADCAST_PERIOD);
@@ -49,5 +56,4 @@ class ServerAdvertiser extends TimerTask {
             System.err.println(e.getMessage() + "\nMulticast failed");
         }
     }
-
 }

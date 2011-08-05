@@ -1,11 +1,10 @@
 package server;
 
 import common.Connection;
-import java.io.DataInputStream;
+import common.Connection.Client;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 
@@ -67,12 +66,11 @@ class ClientListener extends Thread {
     }
 
     /**
-     * Gets a single new Client if any have connected since the last
-     * call to this method. One client at a time is the typical case
-     * and simplifies use.
-     * @return A valid Connection.Client object
+     * Loads all waiting clients into the given collection
+     * @param clients The client collection to add to
      */
-    synchronized Connection.Client getNewClient() {
-        return clientBuffer.poll();
+    void loadNewClients(Collection<Client> clients) {
+        clients.addAll(clientBuffer);
+        clientBuffer.clear();
     }
 }

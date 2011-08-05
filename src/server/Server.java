@@ -37,14 +37,13 @@ public class Server extends TimerTask {
     private final int[] commandBuffer;
     private final double[] actorBuffer;
 
-
     /**
      * Starts a new Server object and schedules its loop for periodic execution
      * @param tcpPort The port to use
      * @param headless Whether or not to crete the server standalone
      * @throws IOException If the socket cannot be bound to
      */
-    public static void start(final int tcpPort, final boolean headless) throws IOException{
+    public static void start(final int tcpPort, final boolean headless) throws IOException {
         new Timer().scheduleAtFixedRate(new Server(tcpPort, headless), 0, Game.GAME_PERIOD);
     }
 
@@ -73,83 +72,29 @@ public class Server extends TimerTask {
     public void run() {
         // First time set up code
         if (!firstTime && !standalone) {
-            localClient = listener.blockUntilClient();
-            clients.add(localClient);
-            addActorfromClient(localClient);
-            try {
-                new ServerAdvertiser(port);
-            } catch (IOException ex) {
-                System.err.println("Multicast service failed");
-            }
-            new Thread(listener).start();
-            firstTime = true;
+            findLocalClient();
         }
 
-        // Receive command sets from all clients
-        Command input;
-        int numCommands;
-        for (Connection.Client client : clients) {
-            try {
-                numCommands = client.getCommands(commandBuffer);
-                for (int i = 0; i < numCommands; i++) {
-                    input = Command.fromInt(Integer.valueOf(commandBuffer[i]));
-                    // Apply the command
-                    switch (input) {
-                        case EXIT:
-                            engine.actors.remove(spacecraftFromClient.get(client));
-                            spacecraftFromClient.remove(client);
-                            break;
-                        case ENTRY:
-                            if (spacecraftFromClient.get(client).isDead()) {
-                                addActorfromClient(client);
-                            }
-                            break;
-                        default:
-                            if (spacecraftFromClient.get(client) != null) {
-                                handleCommand(spacecraftFromClient.get(client), input);
-                            }
-                    }
-                }
-            } catch (IOException e) {
-                removeClient(client);
-            }
-        }
+        handleClientRequests();
 
-        // Handle the ai actor's commands
-        for (Command command : engine.aiActor.update(Collections.unmodifiableCollection(engine.actors))) {
+        for (Command command : engine.aiActor.update(engine.actors)) {
             handleCommand(engine.aiActor, command);
         }
 
-        //calculate the new engine state
         engine.stepTime();
 
-        //transmit the header to each client
-        for (Connection.Client client : spacecraftFromClient.keySet()) {
-            try {
-                client.sendHeader(engine.actors, spacecraftFromClient.keySet());
-            } catch (IOException e) {
-                removeClient(client);
-            }
-        }
+        transmitState();
 
-        // Transmit the actor list to each client
-        for (Actor actor : engine.actors) {
-            //calculate a stream for each actor only once, then transmit to each client
-            actor.toStream(actorBuffer);
-            for (Connection.Client client : spacecraftFromClient.keySet()) {
-                try {
-                    client.sendActor(actorBuffer);
-                } catch (IOException e) {
-                    removeClient(client);
-                }
-            }
-        }
+        listener.loadNewClients(clients);
+    }
 
-        // Ask out client listener if a new client is ready and add if so
-        final Connection.Client client = listener.getNewClient();
-        if (client != null) {
-            clients.add(client);
-        }
+    private void findLocalClient() {
+        localClient = listener.blockUntilClient();
+        clients.add(localClient);
+        addActorfromClient(localClient);
+        new ServerAdvertiser(port);
+        new Thread(listener).start();
+        firstTime = true;
     }
 
     /**
@@ -183,7 +128,6 @@ public class Server extends TimerTask {
         }
     }
 
-
     /**
      * Creates a new Wedge spacecraft, adds it to the engine and maps it
      * to the client in the spacecraftFromClient map.
@@ -204,5 +148,67 @@ public class Server extends TimerTask {
         }
         spacecraftFromClient.remove(client);
         clients.remove(client);
+    }
+
+    /**
+     * Acts upon all requests from all connected clients,
+     * even those not currently in the game.
+     */
+    private void handleClientRequests() {
+        Command input;
+        int numCommands;
+        for (Connection.Client client : clients) {
+            try {
+                numCommands = client.getCommands(commandBuffer);
+                for (int i = 0; i < numCommands; i++) {
+                    input = Command.fromInt(Integer.valueOf(commandBuffer[i]));
+                    // Apply the command
+                    switch (input) {
+                        case EXIT:
+                            engine.actors.remove(spacecraftFromClient.get(client));
+                            spacecraftFromClient.remove(client);
+                            break;
+                        case ENTRY:
+                            if (spacecraftFromClient.get(client).isDead()) {
+                                addActorfromClient(client);
+                            }
+                            break;
+                        default:
+                            if (spacecraftFromClient.get(client) != null) {
+                                handleCommand(spacecraftFromClient.get(client), input);
+                            }
+                    }
+                }
+            } catch (IOException e) {
+                removeClient(client);
+            }
+        }
+    }
+
+    /**
+     * Transmits the entire gamestate to all currently playing clients
+     */
+    private void transmitState() {
+        //transmit the header to each client
+        for (Connection.Client client : spacecraftFromClient.keySet()) {
+            try {
+                client.sendHeader(engine.actors, spacecraftFromClient.keySet());
+            } catch (IOException e) {
+                removeClient(client);
+            }
+        }
+
+        // Transmit the actor list to each client
+        for (Actor actor : engine.actors) {
+            //calculate a stream for each actor only once, then transmit to each client
+            actor.toStream(actorBuffer);
+            for (Connection.Client client : spacecraftFromClient.keySet()) {
+                try {
+                    client.sendActor(actorBuffer);
+                } catch (IOException e) {
+                    removeClient(client);
+                }
+            }
+        }
     }
 }
