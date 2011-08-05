@@ -70,6 +70,7 @@ public class Client implements Runnable {
                 receiveState();
                 updateDisplay();
             } catch (IOException e) {
+                e.printStackTrace();
                 serverManager.removeCurrent();
                 continue;
             }
@@ -89,6 +90,7 @@ public class Client implements Runnable {
 
         // Handle hyperspace requests
         if (commands.contains(Command.HYPERSPACE)) {
+            System.out.println("commands contain hyperspace");
             if (hyperCoolDown == 0 && serverManager.hyper()) {
                 currentActors.clear();
                 hyperCoolDown = HYPERPERIOD;

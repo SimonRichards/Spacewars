@@ -16,6 +16,8 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -74,7 +76,11 @@ public class Server extends TimerTask {
             localClient = listener.blockUntilClient();
             clients.add(localClient);
             addActorfromClient(localClient);
-            ServerAdvertiser.start(port);
+            try {
+                new ServerAdvertiser(port);
+            } catch (IOException ex) {
+                System.err.println("Multicast service failed");
+            }
             new Thread(listener).start();
             firstTime = true;
         }

@@ -30,7 +30,7 @@ public abstract class Actor {
     // Image representing the object on screen, and a graphics context
     // to draw to the image.
     private BufferedImage sprite;
-    protected static Graphics2D spriteGraphics;
+    protected Graphics2D spriteGraphics;
     // Size of the object in pixels
     protected Dimension size;
     // Current position and velocity in the game-space
@@ -40,7 +40,7 @@ public abstract class Actor {
     private double angle = DEFAULT_HEADING;
     // "Gravity constant" of this object. Roughly analogous to GM, where
     // G is the newtonian gravity constant and M is the object mass.
-    private double gravity_constant = DEFAULT_G;
+    private double gravityConstant = DEFAULT_G;
     // True if the object is still active
     private boolean alive = true;
     protected double colour;
@@ -246,7 +246,7 @@ public abstract class Actor {
      * @return the current gravity constant
      */
     public double getGravityConstant() {
-        return gravity_constant;
+        return gravityConstant;
     }
 
     /**
@@ -254,7 +254,7 @@ public abstract class Actor {
      * @param G new gravity constant value
      */
     public void setGravityConstant(final double G) {
-        gravity_constant = G;
+        gravityConstant = G;
     }
 
     /**

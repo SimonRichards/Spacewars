@@ -17,22 +17,25 @@ import java.util.TimerTask;
  */
 class ServerAdvertiser extends TimerTask {
 
-    private byte[] buffer;
-    private int length;
-    private DatagramSocket socket;
-    private DatagramPacket packet;
+    private final DatagramSocket socket;
+    private final DatagramPacket packet;
+
 
     /**
      * Creates the message to send and instantiates the Socket and Packet objects
      * @param tcpPort The port which the TCP based server is bound to
      * @throws IOException If the socket or packet fail to find the host
      */
-    private ServerAdvertiser(int tcpPort) throws IOException {
-        String name = String.valueOf(tcpPort) + " " + System.getProperty("user.name");
-        length = name.length() > Game.UDP_PACKET_LENGTH ? Game.UDP_PACKET_LENGTH : name.length();
-        buffer = name.substring(0, length).getBytes();
+    ServerAdvertiser(final int tcpPort) throws IOException {
+        super();
+        final String name = tcpPort + " " + System.getProperty("user.name");
+        int length = name.length() > Game.UDP_PACKET_LENGTH ? Game.UDP_PACKET_LENGTH : name.length();
+        byte[] buffer = name.substring(0, length).getBytes();
         socket = new DatagramSocket();
         packet = new DatagramPacket(buffer, length, InetAddress.getByName(Game.MULTICAST_GROUP), Game.DEFAULT_UDP_PORT);
+
+        // Start the service
+        new Timer("Broadcaster", true).scheduleAtFixedRate(this, 0, Game.BROADCAST_PERIOD);
     }
 
     /**
@@ -47,15 +50,4 @@ class ServerAdvertiser extends TimerTask {
         }
     }
 
-    /**
-     * Instantiates and schedules a ServerAdvertiser for periodic
-     * @param tcpPort The port which the TCP based server is bound to
-     */
-    static void start(int tcpPort) {
-        try {
-            new Timer("Broadcaster", true).scheduleAtFixedRate(new ServerAdvertiser(tcpPort), 0, Game.BROADCAST_PERIOD);
-        } catch (IOException e) {
-            System.err.println("Could not start multicast service");
-        }
-    }
 }

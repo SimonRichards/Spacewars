@@ -58,6 +58,7 @@ class ServerManager implements Runnable {
         names.remove(servers.get(current).getName());
         servers.remove(current);
         current = 0;
+        System.out.println("removing current");
         hyper();
     }
 
