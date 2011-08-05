@@ -106,11 +106,9 @@ class ServerManager implements Runnable {
      * until one actually works.
      */
     boolean hyper() {
-        System.out.println("starting");
         boolean result = true;
         if (servers.size() <= 1) {
             result = false;
-            System.out.println("not enough servers");
         } else {
             servers.get(current).leave();
             final int temp = current;
@@ -120,7 +118,6 @@ class ServerManager implements Runnable {
 
             try {
                 servers.get(current).join();
-                System.out.println("successful hyperspace jump");
             } catch (IOException e) {
                 System.err.println("Couldn't hyper to new server");
                 // If this happens the client has attempted to
@@ -138,7 +135,6 @@ class ServerManager implements Runnable {
                 }
             }
         }
-        System.out.println("finished");
         return result;
     }
 

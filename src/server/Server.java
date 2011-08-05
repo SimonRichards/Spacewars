@@ -144,8 +144,8 @@ public class Server extends TimerTask {
     }
 
     /**
-     * Removes the client and their
-     * @param client
+     * Removes the client and their associated spacecraft
+     * @param client the client to remove
      */
     private void removeClient(final Client client) {
         final Actor clientActor = spacecraftFromClient.get(client);
@@ -167,7 +167,7 @@ public class Server extends TimerTask {
             try {
                 numCommands = client.getCommands(commandBuffer);
                 for (int i = 0; i < numCommands; i++) {
-                    input = Command.fromInt(Integer.valueOf(commandBuffer[i]));
+                    input = Command.fromInt(commandBuffer[i]);
                     // Apply the command
                     switch (input) {
                         case EXIT:
@@ -175,7 +175,8 @@ public class Server extends TimerTask {
                             spacecraftFromClient.remove(client);
                             break;
                         case ENTRY:
-                            if (spacecraftFromClient.get(client).isDead()) {
+                            if (!spacecraftFromClient.containsKey(client) ||
+                                spacecraftFromClient.get(client).isDead()) {
                                 addActorfromClient(client);
                             }
                             break;

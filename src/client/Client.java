@@ -56,6 +56,7 @@ public class Client implements Runnable {
         display = new Display(Game.APPSIZE, input);
         actorBuffer = new double[Actor.NUM_ELEMENTS];
         clientNames = new LinkedList<String>();
+        server = serverManager.getCurrent();
     }
 
     /**
@@ -65,8 +66,8 @@ public class Client implements Runnable {
     public void run() {
         while (true) {
             try {
-                server = serverManager.getCurrent();
                 handleCommands(input.read());
+                server = serverManager.getCurrent();
                 receiveState();
                 updateDisplay();
             } catch (IOException e) {
@@ -90,7 +91,6 @@ public class Client implements Runnable {
 
         // Handle hyperspace requests
         if (commands.contains(Command.HYPERSPACE)) {
-            System.out.println("commands contain hyperspace");
             if (hyperCoolDown == 0 && serverManager.hyper()) {
                 currentActors.clear();
                 hyperCoolDown = HYPERPERIOD;
@@ -103,7 +103,6 @@ public class Client implements Runnable {
         }
         server.send(commands);
     }
-
 
     /**
      * Retrieves headers and actor streams from the connection to
