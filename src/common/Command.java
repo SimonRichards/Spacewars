@@ -11,7 +11,6 @@ public enum Command {
     EXIT,
     FIRE,
     HYPERSPACE,
-    RESPAWN,
     ENTRY;
 
     public static Command fromInt(int a) {

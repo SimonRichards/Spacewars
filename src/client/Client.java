@@ -82,22 +82,13 @@ public class Client implements Runnable {
         if (commands.contains(Command.EXIT)) {
             System.exit(0);
         }
-        // Send ENTRY command iff user requests a respawn AND user is dead.
-        if (commands.contains(Command.RESPAWN)) {
-            if (!currentActors.containsKey(clientID)) {
-                commands.add(Command.ENTRY);
-            }
-            commands.remove(Command.RESPAWN);
-        }
-
 
         // Handle hyperspace requests
-        if (commands.contains(Command.HYPERSPACE) &&
-                hyperCoolDown == 0 &&
-                serverManager.hyper()) {
-            currentActors.clear();
-            hyperCoolDown = HYPERPERIOD;
-
+        if (commands.contains(Command.HYPERSPACE)) {
+            if (hyperCoolDown == 0 && serverManager.hyper()) {
+                currentActors.clear();
+                hyperCoolDown = HYPERPERIOD;
+            }
             // Do not send the hyperspace command to the server (ever)
             commands.remove(Command.HYPERSPACE);
         }

@@ -92,7 +92,9 @@ public class Server extends TimerTask {
                             spacecraftFromClient.remove(client);
                             break;
                         case ENTRY:
-                            addActorfromClient(client);
+                            if (spacecraftFromClient.get(client).isDead()) {
+                                addActorfromClient(client);
+                            }
                             break;
                         default:
                             Spacecraft sc = spacecraftFromClient.get(client);
@@ -105,7 +107,7 @@ public class Server extends TimerTask {
                 removeClient(client);
             }
         }
-        
+
         // Handle the ai actor's commands
         for (Command command : engine.aiActor.update(Collections.unmodifiableCollection(engine.actors))) {
             handleCommand(engine.aiActor, command);

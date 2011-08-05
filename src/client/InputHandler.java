@@ -26,7 +26,7 @@ class InputHandler extends KeyAdapter {
         commandFromKey.put(KeyEvent.VK_W, Command.FORWARD);
         commandFromKey.put(KeyEvent.VK_A, Command.TURN_CCW);
         commandFromKey.put(KeyEvent.VK_D, Command.TURN_CW);
-        commandFromKey.put(KeyEvent.VK_R, Command.RESPAWN);
+        commandFromKey.put(KeyEvent.VK_R, Command.ENTRY);
         commandFromKey.put(KeyEvent.VK_ESCAPE, Command.EXIT);
         commandFromKey.put(KeyEvent.VK_Q, Command.HYPERSPACE);
         commands = EnumSet.noneOf(Command.class);
