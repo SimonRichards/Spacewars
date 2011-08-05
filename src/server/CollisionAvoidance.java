@@ -70,7 +70,7 @@ public class CollisionAvoidance {
             if (angleFromCrash < Math.PI / 2) {
                 commands.add(Command.TURN_CW);
             } else {
-                System.out.println("forwards");
+//                System.out.println("forwards");
                 commands.add(Command.FORWARD);
 //                commands.add(Command.TURN_CW);
             }
@@ -78,7 +78,7 @@ public class CollisionAvoidance {
             if (angleFromCrash > -Math.PI / 2) {
                 commands.add(Command.TURN_CCW);
             } else {
-                System.out.println("forwards");
+//                System.out.println("forwards");
                 commands.add(Command.FORWARD);
 //                commands.add(Command.TURN_CCW);
             }
