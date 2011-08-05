@@ -1,4 +1,4 @@
-package server.ai;
+package server;
 
 import common.Actor;
 import common.Command;

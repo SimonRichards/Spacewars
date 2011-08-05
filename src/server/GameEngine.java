@@ -7,7 +7,6 @@ import common.Game;
 import java.util.ArrayList;
 import java.util.Random;
 import javax.vecmath.Vector2d;
-import server.ai.AI;
 
 
 /**
