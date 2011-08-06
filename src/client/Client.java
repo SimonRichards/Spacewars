@@ -63,8 +63,8 @@ public class Client extends Thread {
                 receiveState();
                 updateDisplay();
             } catch (IOException e) {
-                e.printStackTrace();
                 serverManager.removeCurrent();
+                server = serverManager.getCurrent();
                 continue;
             }
         }

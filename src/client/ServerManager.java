@@ -12,6 +12,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A ServerManager joins the multicast group and tracks currently available servers.
@@ -54,10 +56,18 @@ class ServerManager extends Thread {
      * Removes the current server from the list and moves to another server
      */
     void removeCurrent() {
-        names.remove(servers.get(current).getName());
-        servers.remove(current);
-        current = 0;
-        hyper();
+        boolean found = false;
+        while (!found) {
+            try {
+                names.remove(servers.get(current).getName());
+                servers.remove(current);
+                current = 0;
+                servers.get(current).join();
+                found = true;
+            } catch (IOException e) {
+                continue;
+            }
+        }
     }
 
     /**
@@ -84,8 +94,10 @@ class ServerManager extends Thread {
             System.err.println("All server connections lost");
             System.exit(-1);
         }
+
         for (Connection.Server server : servers) {
             if (!server.isAlive()) {
+                System.out.println("removing timed out server");
                 servers.remove(server);
                 names.remove(server.getName());
             }
