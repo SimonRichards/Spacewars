@@ -17,6 +17,7 @@ public class CollisionAvoidance {
     private AI ai;
     private static final double PROXIMITY_THRESH = 100;
     private static final double SAFETY_FACTOR = 2;
+    private Vector2d distance;
 
     /**
      *
@@ -61,7 +62,7 @@ public class CollisionAvoidance {
      * @return
      */
     private boolean collisionImminent(Actor threat) {
-        Vector2d distance = new Vector2d();
+        distance = new Vector2d();
         distance.sub(threat.getPosition(), ai.getPosition());
         if (distance.length() < PROXIMITY_THRESH) {
 //            System.out.println("prox");
@@ -87,7 +88,9 @@ public class CollisionAvoidance {
      */
     private Collection<Command> avoid() {
         Collection<Command> commands = new LinkedList<Command>();
-        double angleFromCrash = (ai.getHeading() - ai.getVelocity().angle(new Vector2d(1, 0)));
+        double angleFromCrash = (ai.getHeading() - Math.atan2(distance.y, distance.x));
+                
+//                ai.getVelocity().angle(new Vector2d(1, 0)));
         if (angleFromCrash > 0) {
             if (angleFromCrash < Math.PI / 2) {
                 commands.add(Command.TURN_CW);
