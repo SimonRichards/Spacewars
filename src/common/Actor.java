@@ -35,9 +35,9 @@ public abstract class Actor {
     protected Dimension size;
     // Current position and velocity in the game-space
     private ToroidalCoordinate2D position;
-    private Vector2d velocity;
+    protected Vector2d velocity;
     // Current heading angle in radians
-    private double angle = DEFAULT_HEADING;
+    protected double angle = DEFAULT_HEADING;
     // "Gravity constant" of this object. Roughly analogous to GM, where
     // G is the newtonian gravity constant and M is the object mass.
     private double gravityConstant = DEFAULT_G;
@@ -349,10 +349,10 @@ public abstract class Actor {
      */
     private static double angleWraparound(final double angle) {
         double theta = angle;
-        while (theta < 0.0) {
+        while (theta < -Math.PI / 2) {
             theta += 2.0 * Math.PI;
         }
-        while (theta > 2.0 * Math.PI) {
+        while (theta > Math.PI / 2) {
             theta -= 2.0 * Math.PI;
         }
         return theta;
