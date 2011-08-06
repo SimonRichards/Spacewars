@@ -32,6 +32,7 @@ class ServerManager extends Thread {
     private final Collection<String> names;
     private final byte[] buffer;
     private final DatagramPacket packet;
+    private static int localServerCount = 0;
 
     /**
      * Connects to the local server joins the multicast group
@@ -41,13 +42,14 @@ class ServerManager extends Thread {
      */
     ServerManager(final int port, final int clientID) throws IOException {
         super();
+        String name = localServerName();
         servers = new CopyOnWriteArrayList<Server>(); // Mutations are rare, access isn't
-        servers.add(new Server(InetAddress.getLocalHost(), port, "My server", clientID));
+        servers.add(new Server(InetAddress.getLocalHost(), port, name, clientID));
         multiSocket = new MulticastSocket(Game.DEFAULT_UDP_PORT);
         multiSocket.joinGroup(InetAddress.getByName(Game.MULTICAST_GROUP));
         this.clientID = clientID;
         names = new ArrayList<String>(Game.MAX_SERVERS);
-        names.add("My server");
+        names.add(name);
         buffer = new byte[Game.UDP_PACKET_LENGTH];
         packet = new DatagramPacket(buffer, Game.UDP_PACKET_LENGTH);
     }
@@ -166,7 +168,6 @@ class ServerManager extends Thread {
 
                 // Decode the datagram
                 data = new String(packet.getData()).split(" ");
-                name = data[1].trim().concat("'s server");
                 port = Integer.valueOf(data[0]);
 
                 // Search for matching server and refresh its timeout counter
@@ -181,6 +182,9 @@ class ServerManager extends Thread {
 
                 // If it's a new server then add it to the pool
                 if (!found) {
+                    name = packet.getAddress().getHostAddress().equals(InetAddress.getLocalHost().getHostAddress())
+                            ? localServerName()
+                            : data[1].trim().concat("'s server");
                     if (servers.size() < Game.MAX_SERVERS) {
                         servers.add(new Server(
                                 packet.getAddress(),
@@ -202,5 +206,9 @@ class ServerManager extends Thread {
             System.err.println(e.getMessage());
             System.exit(-1);
         }
+    }
+
+    private String localServerName() {
+        return "Local Server " + ++localServerCount;
     }
 }
