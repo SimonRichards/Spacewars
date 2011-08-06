@@ -187,7 +187,7 @@ class ServerManager extends Thread {
                             packet.getAddress().getHostAddress().equals(
                             InetAddress.getLocalHost().getHostAddress()) ?
                             "Local" :
-                            data[1].trim());
+                            data[1].trim() + "'s");
                     if (servers.size() < Game.MAX_SERVERS) {
                         servers.add(new Server(
                                 packet.getAddress(),
