@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * A ServerManager joins the multicast MULTICAST_GROUP and tracks currently available servers.
+ * A ServerManager joins the multicast group and tracks currently available servers.
  * New servers are added to the clients list and old servers are refreshed so that
  * unresponsive ones may be cleared out. Servers are collected in a copy on write
  * array to allow fast asynchronous access to array elements and the occasional
@@ -32,14 +32,14 @@ class ServerManager extends Thread {
     private final DatagramPacket packet;
 
     /**
-     * Connects to the local server joins the multicast MULTICAST_GROUP
+     * Connects to the local server joins the multicast group
      * @param port The local server's TCP port
      * @param clientID The client's ID
      * @throws IOException if the UDP or TCP connections fail
      */
     ServerManager(final int port, final int clientID) throws IOException {
         super();
-        servers = new CopyOnWriteArrayList<Server>();
+        servers = new CopyOnWriteArrayList<Server>(); // Mutations are rare, access isn't
         servers.add(new Server(InetAddress.getLocalHost(), port, "My server", clientID));
         multiSocket = new MulticastSocket(Game.DEFAULT_UDP_PORT);
         multiSocket.joinGroup(InetAddress.getByName(Game.MULTICAST_GROUP));

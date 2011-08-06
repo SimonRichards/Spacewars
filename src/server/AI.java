@@ -15,7 +15,7 @@ import javax.vecmath.Vector2d;
  */
 public class AI extends Spacecraft.Needle {
     private final CollisionAvoidance collisionAvoidance;
-    private static final double AIMING_THRESH = 0.1;
+    private static final double AIMING_THRESH = 0.3;
     private static final double TURNING_DEADZONE = 0.1;
 
 
@@ -39,7 +39,8 @@ public class AI extends Spacecraft.Needle {
         if(collisionAvoidance.isIdle()){
             searchLoop: for(Actor target : actors){
                 if(target.getActorType() == Actor.ActorType.WEDGE.ordinal()){
-                    double angleDiff = getHeading() - getPosition().angle(target.getPosition());
+                    double angleDiff = getHeading() - Math.atan2(target.getPosition().y - getPosition().y, target.getPosition().x - getPosition().x);
+                    angleDiff %= Math.PI*2;
                     if (Math.abs(angleDiff) > TURNING_DEADZONE) {
                         commands.add(angleDiff > 0 ? Command.TURN_CCW : Command.TURN_CW);
                     }
@@ -51,5 +52,11 @@ public class AI extends Spacecraft.Needle {
             }
         }
         return commands;
+    }
+    private void print(String s) {
+        System.out.println(s);
+    }
+    private void print(Double d) {
+        System.out.println(d);
     }
 }

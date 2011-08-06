@@ -18,14 +18,27 @@ public class CollisionAvoidance {
     private static final double PROXIMITY_THRESH = 100;
     private static final double SAFETY_FACTOR = 2;
 
+    /**
+     *
+     * @param ai
+     */
     public CollisionAvoidance(AI ai) {
         this.ai = ai;
     }
 
+    /**
+     * 
+     * @return
+     */
     public boolean isIdle() {
         return idle;
     }
 
+    /**
+     *
+     * @param actors
+     * @return
+     */
     public Collection<Command> update(Collection<Actor> actors) {
         idle = true;
         Collection<Command> commands = EnumSet.noneOf(Command.class);
@@ -42,6 +55,11 @@ public class CollisionAvoidance {
         return commands;
     }
 
+    /**
+     *
+     * @param threat
+     * @return
+     */
     private boolean collisionImminent(Actor threat) {
         Vector2d distance = new Vector2d();
         distance.sub(threat.getPosition(), ai.getPosition());
@@ -63,6 +81,10 @@ public class CollisionAvoidance {
         return false;
     }
 
+    /**
+     *
+     * @return
+     */
     private Collection<Command> avoid() {
         Collection<Command> commands = new LinkedList<Command>();
         double angleFromCrash = (ai.getHeading() - ai.getVelocity().angle(new Vector2d(1, 0)));
