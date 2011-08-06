@@ -53,10 +53,4 @@ public class AI extends Spacecraft.Needle {
         }
         return commands;
     }
-    private void print(String s) {
-        System.out.println(s);
-    }
-    private void print(Double d) {
-        System.out.println(d);
-    }
 }
