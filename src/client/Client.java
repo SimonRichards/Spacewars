@@ -64,7 +64,6 @@ public class Client extends Thread {
                 updateDisplay();
             } catch (IOException e) {
                 e.printStackTrace();
-                System.out.println("current server failed");
                 serverManager.removeCurrent();
                 continue;
             }

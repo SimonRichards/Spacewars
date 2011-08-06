@@ -41,6 +41,9 @@ public class AI extends Spacecraft.Needle {
                 if(target.getActorType() == Actor.ActorType.WEDGE.ordinal()){
                     double angleDiff = getHeading() - Math.atan2(target.getPosition().y - getPosition().y, target.getPosition().x - getPosition().x);
                     angleDiff %= Math.PI*2;
+                    if (angleDiff > Math.PI) {
+                        angleDiff -= 2*Math.PI;
+                    }
                     if (Math.abs(angleDiff) > TURNING_DEADZONE) {
                         commands.add(angleDiff > 0 ? Command.TURN_CCW : Command.TURN_CW);
                     }
