@@ -183,7 +183,11 @@ class ServerManager extends Thread {
 
                 // If it's a new server then add it to the pool
                 if (!found) {
-                    name = getServerName(packet.getAddress().getHostAddress().equals(InetAddress.getLocalHost().getHostAddress()) ? "Local" : data[1].trim());
+                    name = getServerName(
+                            packet.getAddress().getHostAddress().equals(
+                            InetAddress.getLocalHost().getHostAddress()) ?
+                            "Local" :
+                            data[1].trim());
                     if (servers.size() < Game.MAX_SERVERS) {
                         servers.add(new Server(
                                 packet.getAddress(),
