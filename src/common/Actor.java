@@ -349,10 +349,10 @@ public abstract class Actor {
      */
     private static double angleWraparound(final double angle) {
         double theta = angle;
-        while (theta < -Math.PI / 2) {
+        while (theta < -Math.PI) {
             theta += 2.0 * Math.PI;
         }
-        while (theta > Math.PI / 2) {
+        while (theta > Math.PI) {
             theta -= 2.0 * Math.PI;
         }
         return theta;
