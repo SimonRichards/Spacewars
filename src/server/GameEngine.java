@@ -63,7 +63,7 @@ class GameEngine {
         }
 
         // Add the AI spacecraft
-        addAiActor();
+        aiActor = addAiActor();
     }
 
     /**
@@ -80,10 +80,17 @@ class GameEngine {
         return newActor;
     }
 
-    private void addAiActor() {
-        aiActor = new AI(new Vector2d(400.0, 400.0),
-                new Vector2d(1.0, -1.0));
-        actors.add(aiActor);
+    /**
+     * Creates a new AI actor and adds him to the actor collection
+     * @return The new AI actor
+     */
+    private AI addAiActor() {
+        Vector2d position = new Vector2d(Game.rand.nextInt(Game.APPSIZE.width), Game.rand.nextInt(Game.APPSIZE.height));
+        Vector2d velocity = new Vector2d(10 * (Game.rand.nextDouble() - 0.5), 10 * (Game.rand.nextDouble() - 0.5));
+        AI newActor = new AI(position, velocity);
+        newActor.rotate(Game.rand.nextDouble() * Math.PI * 2);
+        actors.add(newActor);
+        return newActor;
     }
 
     /**
@@ -123,7 +130,7 @@ class GameEngine {
 
         if (aiActor.isDead()) {
             if (--aiRespawnCounter < 0) {
-                addAiActor();
+                aiActor = addAiActor();
                 aiRespawnCounter = AI_RESPAWN_PERIOD;
             }
         }

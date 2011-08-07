@@ -61,7 +61,7 @@ public abstract class Spacecraft extends Actor {
 
 
     /**
-     * Create a new spacecraft with the specified position and velocity.
+     * Create a new spacecraft with given values.
      * @param id The actor's id
      * @param pos initial spacecraft position
      * @param vel initial spacecraft velocity
@@ -71,9 +71,9 @@ public abstract class Spacecraft extends Actor {
     }
 
     /**
-     *
-     * @param pos
-     * @param vel
+     * Create a new spacecraft with given values.
+     * @param pos initial spacecraft position
+     * @param vel initial spacecraft velocity
      */
     public Spacecraft(Vector2d pos, Vector2d vel) {
         super(pos, vel);
@@ -181,10 +181,6 @@ public abstract class Spacecraft extends Actor {
         public int getActorType() {
             return ActorType.WEDGE.ordinal();
         }
-
-
     }
-
-
 }
 
