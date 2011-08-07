@@ -51,15 +51,6 @@ public class AI extends Spacecraft.Needle {
         return commands;
     }
 
-    private boolean collisionImminent(Actor threat) {
-        distanceToThreat = new Vector2d();
-        distanceToThreat.sub(threat.getPosition(), getPosition());
-        if (distanceToThreat.length() < PROXIMITY_THRESH) {
-            return true;
-        }
-        return false;
-    }
-
     /**
      * Checks all stars and wedges from the list to see whether they need to be
      * avoided and
@@ -78,6 +69,24 @@ public class AI extends Spacecraft.Needle {
         return null;
     }
 
+    /**
+     * Decides whether a potential threat might collide with the ai
+     * @param threat The actor which could be a threat
+     * @return If the ai is in danger from the threat
+     */
+    private boolean collisionImminent(Actor threat) {
+        distanceToThreat = new Vector2d();
+        distanceToThreat.sub(threat.getPosition(), getPosition());
+        if (distanceToThreat.length() < PROXIMITY_THRESH) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Causes the ai to move away from a threat
+     * @return A movement command
+     */
     private Command dodge() {
         double angleFromCrash = Actor.angleWraparound(angle - Math.atan2(distanceToThreat.y, distanceToThreat.x)); //ai.getVelocity().angle(new Vector2d(1, 0)));
         if (angleFromCrash > 0) {
@@ -95,6 +104,11 @@ public class AI extends Spacecraft.Needle {
         }
     }
 
+    /**
+     * Slows down the ai by first turning away from the direction of travel and
+     * then accelerating
+     * @return The movement command to effect the slowdown
+     */
     private Command slowDown() {
         double angleFromTrajectory = angleWraparound(angle - Math.atan2(velocity.y, velocity.x));
         if (angleFromTrajectory > 0) {
@@ -112,6 +126,11 @@ public class AI extends Spacecraft.Needle {
         }
     }
 
+    /**
+     * Engages with any available wedges
+     * @param actors Actors, which might include wedges
+     * @return Shooting and/or turning commands
+     */
     private Collection<Command> engage(Collection<Actor> actors) {
         Collection<Command> commands = EnumSet.noneOf(Command.class);
         searchLoop:
