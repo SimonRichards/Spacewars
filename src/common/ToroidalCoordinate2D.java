@@ -69,7 +69,7 @@ public class ToroidalCoordinate2D {
      *
      * @param delta the vector defining dx and dy
      */
-    public void translate(Vector2d delta) {
+    public final void translate(Vector2d delta) {
         pos.add(delta);
 
         // Check and correct for x wraparound

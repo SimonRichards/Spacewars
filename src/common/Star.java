@@ -1,7 +1,6 @@
 package common;
 
 import java.awt.*;
-import java.nio.DoubleBuffer;
 import javax.vecmath.Vector2d;
 
 /**

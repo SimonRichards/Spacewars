@@ -9,15 +9,15 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 /**
- * A server advertiser periodically sends Datagrams to the Multicast MULTICAST_GROUP defined in Game.
+ * A server advertiser periodically sends Datagrams to the MULTICAST_GROUP defined in Game.
  * These packet contain the host's user name (for identification) and the TCP port which
  * the server is bound to. The client may determine the host's address by inspecting the packet.
  * @author Simon, Daniel
  */
 class ServerAdvertiser extends TimerTask {
 
-    private DatagramSocket socket = null;
-    private DatagramPacket packet = null;
+    private DatagramSocket socket;
+    private DatagramPacket packet;
 
     /**
      * Creates the message to send and instantiates the Socket and Packet objects
@@ -32,13 +32,12 @@ class ServerAdvertiser extends TimerTask {
         try {
             socket = new DatagramSocket();
             packet = new DatagramPacket(buffer, length, InetAddress.getByName(Game.MULTICAST_GROUP), Game.DEFAULT_UDP_PORT);
+            // Start the service
+            new Timer("Multicast Service", true).scheduleAtFixedRate(this, 0, Game.BROADCAST_PERIOD);
         } catch (IOException e) {
             System.err.println("Could not start UDP service");
             System.exit(-1);
         }
-
-        // Start the service
-        new Timer("Broadcaster", true).scheduleAtFixedRate(this, 0, Game.BROADCAST_PERIOD);
     }
 
     /**

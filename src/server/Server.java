@@ -9,24 +9,22 @@ import common.Missile;
 import common.Spacecraft;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
- *
+ * A server object is responsible for managing the game's back end.
+ * It maintains communications with all clients, handling their
+ * requests, updating the GameEngine accordingly and transmitting
+ * the new game state to all active clients.
  * @author Simon, Daniel
  */
 public class Server extends TimerTask {
 
     private final Collection<Connection.Client> clients;
-    private Connection.Client localClient;
     private final GameEngine engine;
     private final Map<Connection.Client, Spacecraft> spacecraftFromClient;
     private static final int MAX_CLIENTS = 10;
@@ -44,7 +42,7 @@ public class Server extends TimerTask {
      * @throws IOException If the socket cannot be bound to
      */
     public static void start(int tcpPort, boolean headless) throws IOException {
-        new Timer().scheduleAtFixedRate(new Server(tcpPort, headless), 0, Game.GAME_PERIOD);
+        new Timer("Server").scheduleAtFixedRate(new Server(tcpPort, headless), 0, Game.GAME_PERIOD);
     }
 
     /**
@@ -75,13 +73,11 @@ public class Server extends TimerTask {
             findLocalClient();
         }
 
+
+        // Main game loop
         handleClientRequests();
 
-        if(!engine.aiActor.isDead()){
-            for (Command command : engine.aiActor.update(engine.actors)) {
-                handleCommand(engine.aiActor, command);
-            }
-        }
+        updateAI();
 
         engine.stepTime();
 
@@ -97,7 +93,7 @@ public class Server extends TimerTask {
      * starting a server advertising service.
      */
     private void findLocalClient() {
-        localClient = listener.blockUntilClient();
+        Client localClient = listener.blockUntilClient();
         clients.add(localClient);
         addActorfromClient(localClient);
         new ServerAdvertiser(port);
@@ -177,8 +173,8 @@ public class Server extends TimerTask {
                             spacecraftFromClient.remove(client);
                             break;
                         case ENTRY:
-                            if (!spacecraftFromClient.containsKey(client) ||
-                                spacecraftFromClient.get(client).isDead()) {
+                            if (!spacecraftFromClient.containsKey(client)
+                                    || spacecraftFromClient.get(client).isDead()) {
                                 addActorfromClient(client);
                             }
                             break;
@@ -217,6 +213,17 @@ public class Server extends TimerTask {
                 } catch (IOException e) {
                     removeClient(client);
                 }
+            }
+        }
+    }
+
+    /**
+     * Allows the ai spacecraft to update its state
+     */
+    private void updateAI() {
+        if (!engine.aiActor.isDead()) {
+            for (Command command : engine.aiActor.update(engine.actors)) {
+                handleCommand(engine.aiActor, command);
             }
         }
     }

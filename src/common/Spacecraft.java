@@ -131,7 +131,6 @@ public abstract class Spacecraft extends Actor {
                                     4);
         public Needle(Vector2d position, Vector2d velocity) {
             super(position, velocity);
-            rotate(Math.toRadians(135.0)); //TODO: redundant?
             setSprite();
         }
 
@@ -163,7 +162,6 @@ public abstract class Spacecraft extends Actor {
         public Wedge(int id, Vector2d position, Vector2d velocity) {
             super(id, position, velocity);
             colour = Math.abs((double)id / Integer.MAX_VALUE);
-            rotate(Math.toRadians(45.0)); //TODO: redundant?
             setSprite();
         }
 

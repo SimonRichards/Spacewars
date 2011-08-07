@@ -42,7 +42,7 @@ class ServerManager extends Thread {
      * @throws IOException if the UDP or TCP connections fail
      */
     ServerManager(int port, int clientID) throws IOException {
-        super();
+        super("ServerManager");
         serverCounter = new HashMap<String, Integer>(Game.MAX_SERVERS, 1.0f);
         String name = getServerName(LOCAL_SERVER_NAME);
         servers = new CopyOnWriteArrayList<Server>(); // Mutations are rare, access isn't

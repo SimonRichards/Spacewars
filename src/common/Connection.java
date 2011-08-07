@@ -6,11 +6,11 @@ import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Sub-classes of Connection abstract sending and receiving data to
@@ -38,7 +38,7 @@ public abstract class Connection {
     public static class Client extends Connection {
 
         private static final int MAX_NAME_LENGTH = 20;
-        private int id;
+        private final int id;
 
         /**
          * Creates a new client connection on the given socket
@@ -136,7 +136,7 @@ public abstract class Connection {
      */
     public static class Server extends Connection {
 
-        private final ArrayList<Integer> actorList;
+        private final List<Integer> actorList;
         private long lastRefreshed;
         private static final long TIMEOUT = 1200;
 
@@ -175,7 +175,7 @@ public abstract class Connection {
         }
 
         /**
-         * Sends a MULTICAST_GROUP of commands by their ordinal values
+         * Sends a group of commands by their ordinal values
          * @param commands The command set to send
          * @throws IOException if the link to the server was lost
          */
@@ -266,15 +266,5 @@ public abstract class Connection {
         public void heartbeat() {
             lastRefreshed = System.currentTimeMillis();
         }
-    }
-
-    /**
-     * Attempts to close the socket upon GC
-     * @throws Throwable a possible IOException
-     */
-    @Override
-    protected void finalize() throws Throwable {
-        super.finalize();
-        socket.close();
     }
 }

@@ -9,7 +9,6 @@ import java.util.Collection;
 import java.util.LinkedList;
 
 /**
- *
  * ClientListener objects block in their own thread until a client connects.
  * These clients may then be retrieved by another thread at a time of its choosing.
  * @author Simon, Daniel

@@ -1,11 +1,10 @@
 package server;
 
-import common.Actor; //TODO: for all files, fix imports
+import common.Actor;
 import common.Command;
 import common.Spacecraft;
 import java.util.Collection;
 import java.util.EnumSet;
-import java.util.LinkedList;
 import javax.vecmath.Vector2d;
 
 /**
@@ -32,10 +31,11 @@ public class AI extends Spacecraft.Needle {
 
     /**
      * Tracks a player controlled spacecraft and fires if facing (roughly) towards it
+     * //TODO: support multiple wedges
      * @param actors The actor list to scan for players
      * @return An appropriate command set
      */
-    public Collection<Command> update(Collection<Actor> actors) { //TODO: support multiple wedges
+    public Collection<Command> update(Collection<Actor> actors) {
         Collection<Command> commands = EnumSet.noneOf(Command.class);
         Command avoidCommand = avoidCollisions(actors);
         if (avoidCommand != null) {
@@ -59,11 +59,10 @@ public class AI extends Spacecraft.Needle {
      */
     private Command avoidCollisions(Collection<Actor> actors) {
         for (Actor threat : actors) {
-            if ((threat.getActorType() == Actor.ActorType.STAR.ordinal())
-                    || (threat.getActorType() == Actor.ActorType.WEDGE.ordinal())) {
-                if (collisionImminent(threat)) {
-                    return dodge();
-                }
+            if ((threat.getActorType() == Actor.ActorType.STAR.ordinal()
+                    || (threat.getActorType() == Actor.ActorType.WEDGE.ordinal()))
+                    && collisionImminent(threat)) {
+                return dodge();
             }
         }
         return null;

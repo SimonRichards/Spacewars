@@ -1,7 +1,6 @@
 package common;
 
 import java.awt.*;
-import java.nio.DoubleBuffer;
 import javax.vecmath.Vector2d;
 
 /**
@@ -32,7 +31,6 @@ public class Missile extends Actor {
     // Remaining number of time-steps before the missile becomes inactive.
     private int lifetime = INIT_LIFE;
 
-    private static final double DEFAULT_G = 0.001;
     private static final int MISSILE_CRASH_EFFECT = 1;
     private static final double MAX_MISSLE_VEL = 50;
 
@@ -72,8 +70,8 @@ public class Missile extends Actor {
      * @param actorID The unique identifier of this actor
      * @param buffer An array of doubles, according to the network protocol
      */
-    Missile(int id, double[] buffer) {
-        super(id, buffer);
+    Missile(int actorID, double[] buffer) {
+        super(actorID, buffer);
         spriteGraphics.setColor(Color.getHSBColor((float)buffer[0], 1f, 1f));
         spriteGraphics.drawPolygon(shape);
     }

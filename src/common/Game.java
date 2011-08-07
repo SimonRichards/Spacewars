@@ -3,16 +3,14 @@ package common;
 import client.Client;
 import java.awt.Dimension;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.util.Random;
-import java.util.Timer;
 import server.Server;
 
 /**
  *
  * @author Simon
  */
-public class Game {
+public final class Game {
 
     private Game() {}
 

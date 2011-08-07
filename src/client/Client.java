@@ -38,7 +38,7 @@ public class Client extends Thread {
      * @throws IOException if there is an error in the TCP protocol
      */
     public Client(int port) throws IOException {
-        super();
+        super("Client");
         serverManager = new ServerManager(port, Game.rand.nextInt());
         input = new InputHandler();
         currentActors = new HashMap<Integer, Actor>(50);
