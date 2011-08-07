@@ -25,6 +25,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 class ServerManager extends Thread {
 
+    private static final String LOCAL_SERVER_NAME = "Local";
     private final MulticastSocket multiSocket;
     private final List<Connection.Server> servers;
     private int current;
@@ -43,7 +44,7 @@ class ServerManager extends Thread {
     ServerManager(final int port, final int clientID) throws IOException {
         super();
         serverCounter = new HashMap<String, Integer>(Game.MAX_SERVERS, 1.0f);
-        String name = getServerName("Local");
+        final String name = getServerName(LOCAL_SERVER_NAME);
         servers = new CopyOnWriteArrayList<Server>(); // Mutations are rare, access isn't
         servers.add(new Server(InetAddress.getLocalHost(), port, name, clientID));
         multiSocket = new MulticastSocket(Game.DEFAULT_UDP_PORT);
@@ -100,7 +101,6 @@ class ServerManager extends Thread {
 
         for (Connection.Server server : servers) {
             if (!server.isAlive()) {
-                System.out.println("removing timed out server");
                 servers.remove(server);
                 names.remove(server.getName());
             }
@@ -119,9 +119,8 @@ class ServerManager extends Thread {
      * until one actually works.
      */
     boolean hyper() {
-        boolean result = true;
         if (servers.size() <= 1) {
-            result = false;
+            return false;
         } else {
             servers.get(current).leave();
             final int temp = current;
@@ -147,8 +146,8 @@ class ServerManager extends Thread {
                     }
                 }
             }
+            return true;
         }
-        return result;
     }
 
     /**
@@ -186,7 +185,7 @@ class ServerManager extends Thread {
                     name = getServerName(
                             packet.getAddress().getHostAddress().equals(
                             InetAddress.getLocalHost().getHostAddress()) ?
-                            "Local" :
+                            LOCAL_SERVER_NAME :
                             data[1].trim() + "'s");
                     if (servers.size() < Game.MAX_SERVERS) {
                         servers.add(new Server(
@@ -216,7 +215,7 @@ class ServerManager extends Thread {
      * @param address The server's address
      * @return A unique name for the server
      */
-    private String getServerName(String name) {
+    private String getServerName(final String name) {
         if (serverCounter.containsKey(name)) {
             serverCounter.put(name, serverCounter.get(name) + 1);
         } else {

@@ -11,7 +11,6 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.Random;
 
 /**
  * A client object bundles the user interface (display and input) along with

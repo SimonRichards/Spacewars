@@ -7,9 +7,6 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import javax.vecmath.Vector2d;
 import java.awt.geom.Rectangle2D;
-import java.nio.ByteBuffer;
-import java.nio.DoubleBuffer;
-import java.util.Random;
 
 /**
  * General class of all objects in the Spacewar game. Every object has
@@ -52,8 +49,8 @@ public abstract class Actor {
      * Creates a new Actor with the given actorID
      * @param actorID The chosen actorID
      */
-    private Actor(int id) {
-        this.actorID = id;
+    private Actor(final int actorID) {
+        this.actorID = actorID;
         sprite = new BufferedImage(SPRITE_DIM, SPRITE_DIM,
                 BufferedImage.TYPE_INT_ARGB);
         spriteGraphics = sprite.createGraphics();
@@ -83,13 +80,13 @@ public abstract class Actor {
 
     /**
      * Creates an object at the specified position and velocity
-     * @param id The
+     * @param actorID The
      * @param initPos the object position
      * @param initV the object velocity
      * gives the full range
      */
-    protected Actor(int id, Vector2d initPos, Vector2d initV) {
-        this(id);
+    protected Actor(final int actorID, final Vector2d initPos, final Vector2d initV) {
+        this(actorID);
         position = new ToroidalCoordinate2D(initPos);
         velocity = new Vector2d(initV);
     }
@@ -99,7 +96,7 @@ public abstract class Actor {
      * @param pos The initial position
      * @param vel The initial Velocity
      */
-    protected Actor(Vector2d pos, Vector2d vel) {
+    protected Actor(final Vector2d pos, final Vector2d vel) {
         this();
         position = new ToroidalCoordinate2D(pos);
         velocity = new Vector2d(vel);
@@ -107,11 +104,11 @@ public abstract class Actor {
 
     /**
      * For client side instantiating
-     * @param id the actor's id
+     * @param actorID the actor's id
      * @param buffer The set of doubles received from a server
      */
-    protected Actor(int id, double[] buffer) {
-        this(id);
+    protected Actor(final int actorID, final double[] buffer) {
+        this(actorID);
         spriteGraphics.setColor(Color.getHSBColor((float) buffer[0], 0.5f, 0.5f));
         position = new ToroidalCoordinate2D(new Vector2d(buffer[1], buffer[2]));
 //      velocity = new Vector2d(buffer[3], buffer[4]);
@@ -122,7 +119,7 @@ public abstract class Actor {
      * For client side updating
      * @param buffer The buffer to update from
      */
-    public void updateFromStream(double[] buffer) {
+    public void updateFromStream(final double[] buffer) {
         position = new ToroidalCoordinate2D(new Vector2d(buffer[1], buffer[2]));
 //      velocity = new Vector2d(buffer[3], buffer[4]);
         angle = buffer[3];
@@ -132,7 +129,7 @@ public abstract class Actor {
      * Saves the state of this actor to a buffer for transmission
      * @param buffer The buffer to save to, needs to be Actor.NUM_ELEMENTS long
      */
-    public void toStream(double[] buffer) {
+    public void toStream(final double[] buffer) {
         int i = 0;
         buffer[i++] = colour;
         buffer[i++] = position.getX();

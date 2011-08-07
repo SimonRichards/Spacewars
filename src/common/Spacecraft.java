@@ -29,13 +29,14 @@ public abstract class Spacecraft extends Actor {
      * @return The new missile object
      */
     public Missile fire() {
-        Missile missle = null;
+        Missile missile = null;
         if(timeTillCool < 0){
-            Vector2d vel = new Vector2d(getVelocity());
-            missle = new Missile(getPosition(), vel, getHeading());
+            missile = new Missile(getPosition(),
+                    new Vector2d(getVelocity()),
+                    getHeading());
             timeTillCool = COOLDOWN_TIME;
         }
-        return missle;
+        return missile;
     }
 
     /**
@@ -53,21 +54,20 @@ public abstract class Spacecraft extends Actor {
      * @param actorID The actorID of the new spacecraft
      * @param buffer The buffer to build from
      */
-    Spacecraft(int id, double[] buffer) {
+    Spacecraft(final int id, final double[] buffer) {
         super(id, buffer);
-        timeTillCool = 0;
     }
 
 
 
     /**
      * Create a new spacecraft with the specified position and velocity.
+     * @param id The actor's id
      * @param pos initial spacecraft position
      * @param vel initial spacecraft velocity
      */
-    public Spacecraft(int id, Vector2d pos, Vector2d vel) {
+    public Spacecraft(final int id, final Vector2d pos, final Vector2d vel) {
         super(id, pos, vel);
-        timeTillCool = 0;
     }
 
     /**
@@ -75,9 +75,8 @@ public abstract class Spacecraft extends Actor {
      * @param pos
      * @param vel
      */
-    public Spacecraft(Vector2d pos, Vector2d vel) {
+    public Spacecraft(final Vector2d pos, final Vector2d vel) {
         super(pos, vel);
-        timeTillCool = 0;
     }
 
     /**
