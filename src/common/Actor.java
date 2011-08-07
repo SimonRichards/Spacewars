@@ -347,7 +347,7 @@ public abstract class Actor {
      * @return an angle equivalent to the input, but within the
      * range 0 <= angle <= 2*PI
      */
-    private static double angleWraparound(final double angle) {
+    public static double angleWraparound(final double angle) {
         double theta = angle;
         while (theta < -Math.PI) {
             theta += 2.0 * Math.PI;

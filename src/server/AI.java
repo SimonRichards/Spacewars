@@ -1,7 +1,6 @@
 package server;
 
-import common.Actor;
-import common.Command;
+import common.Actor; //TODO: for all files, fix imports
 import common.Command;
 import common.Spacecraft;
 import java.util.Collection;
@@ -40,7 +39,7 @@ public class AI extends Spacecraft.Needle {
         Collection<Command> commands = collisionAvoidance.update(actors);
         if (collisionAvoidance.isIdle()) {
             if (velocity.length() > AI_MAX_VELOCITY) {
-                double angleFromTrajectory = (angle - Math.atan2(velocity.y, velocity.x))%Math.PI;
+                double angleFromTrajectory = angleWraparound(angle - Math.atan2(velocity.y, velocity.x));
                 System.out.println("slowing. angle: " + angle + " velAngle: " + Math.atan2(velocity.y, velocity.x) + " aFT: " + angleFromTrajectory);
                 if (angleFromTrajectory > 0) {
                     if (angleFromTrajectory < Math.PI - SLOWDOWN_ANGLE_THRESH) {

@@ -88,7 +88,7 @@ public class CollisionAvoidance {
      */
     private Collection<Command> avoid() {
         Collection<Command> commands = new LinkedList<Command>();
-        double angleFromCrash = (ai.getHeading() - Math.atan2(distance.y, distance.x)); //ai.getVelocity().angle(new Vector2d(1, 0)));
+        double angleFromCrash = Actor.angleWraparound(ai.getHeading() - Math.atan2(distance.y, distance.x)); //ai.getVelocity().angle(new Vector2d(1, 0)));
         if (angleFromCrash > 0) {
             if (angleFromCrash < Math.PI / 2) {
                 commands.add(Command.TURN_CW);
