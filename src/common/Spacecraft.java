@@ -54,7 +54,7 @@ public abstract class Spacecraft extends Actor {
      * @param actorID The actorID of the new spacecraft
      * @param buffer The buffer to build from
      */
-    Spacecraft(final int id, final double[] buffer) {
+    Spacecraft(int id, double[] buffer) {
         super(id, buffer);
     }
 
@@ -66,7 +66,7 @@ public abstract class Spacecraft extends Actor {
      * @param pos initial spacecraft position
      * @param vel initial spacecraft velocity
      */
-    public Spacecraft(final int id, final Vector2d pos, final Vector2d vel) {
+    public Spacecraft(int id, Vector2d pos, Vector2d vel) {
         super(id, pos, vel);
     }
 
@@ -75,7 +75,7 @@ public abstract class Spacecraft extends Actor {
      * @param pos
      * @param vel
      */
-    public Spacecraft(final Vector2d pos, final Vector2d vel) {
+    public Spacecraft(Vector2d pos, Vector2d vel) {
         super(pos, vel);
     }
 

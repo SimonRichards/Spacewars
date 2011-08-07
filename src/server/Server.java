@@ -43,7 +43,7 @@ public class Server extends TimerTask {
      * @param headless Whether or not to create the server standalone
      * @throws IOException If the socket cannot be bound to
      */
-    public static void start(final int tcpPort, final boolean headless) throws IOException {
+    public static void start(int tcpPort, boolean headless) throws IOException {
         new Timer().scheduleAtFixedRate(new Server(tcpPort, headless), 0, Game.GAME_PERIOD);
     }
 
@@ -53,7 +53,7 @@ public class Server extends TimerTask {
      * @param standalone
      * @throws IOException if the Server cannot be created
      */
-    private Server(final int port, final boolean standalone) throws IOException {
+    private Server(int port, boolean standalone) throws IOException {
         super();
         commandBuffer = new int[Game.COMMAND_BUFFER_SIZE];
         actorBuffer = new double[Actor.NUM_ELEMENTS];
@@ -111,7 +111,7 @@ public class Server extends TimerTask {
      * @param spacecraft The spacecraft to apply the command to
      * @param input The command sent by the client
      */
-    private void handleCommand(final Spacecraft spacecraft, final Command input) {
+    private void handleCommand(Spacecraft spacecraft, Command input) {
         switch (input) {
             case FORWARD:
                 spacecraft.accelerate(0.5);
@@ -141,7 +141,7 @@ public class Server extends TimerTask {
      * to the client in the spacecraftFromClient map.
      * @param client The client to map to
      */
-    private void addActorfromClient(final Connection.Client client) {
+    private void addActorfromClient(Connection.Client client) {
         spacecraftFromClient.put(client, engine.addSpaceship(client.getID()));
     }
 
@@ -149,8 +149,8 @@ public class Server extends TimerTask {
      * Removes the client and their associated spacecraft
      * @param client the client to remove
      */
-    private void removeClient(final Client client) {
-        final Actor clientActor = spacecraftFromClient.get(client);
+    private void removeClient(Client client) {
+        Actor clientActor = spacecraftFromClient.get(client);
         if (clientActor != null) {
             clientActor.destroy();
         }

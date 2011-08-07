@@ -24,9 +24,9 @@ class ServerAdvertiser extends TimerTask {
      * @param tcpPort The port which the TCP based server is bound to
      * @throws IOException If the socket or packet fail to find the host
      */
-    ServerAdvertiser(final int tcpPort) {
+    ServerAdvertiser(int tcpPort) {
         super();
-        final String name = tcpPort + " " + System.getProperty("user.name");
+        String name = tcpPort + " " + System.getProperty("user.name");
         int length = name.length() > Game.UDP_PACKET_LENGTH ? Game.UDP_PACKET_LENGTH : name.length();
         byte[] buffer = name.substring(0, length).getBytes();
         try {

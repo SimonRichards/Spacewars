@@ -37,7 +37,7 @@ public class Client extends Thread {
      * @param port The TCP/IP port to find the local server on
      * @throws IOException if there is an error in the TCP protocol
      */
-    public Client(final int port) throws IOException {
+    public Client(int port) throws IOException {
         super();
         serverManager = new ServerManager(port, Game.rand.nextInt());
         input = new InputHandler();
@@ -75,7 +75,7 @@ public class Client extends Thread {
      * @param commands The current command set
      * @throws IOException if the server cannot be contacted
      */
-    private void handleCommands(final EnumSet<Command> commands) throws IOException {
+    private void handleCommands(EnumSet<Command> commands) throws IOException {
         if (commands.contains(Command.EXIT)) {
             System.exit(0);
         }
@@ -101,14 +101,14 @@ public class Client extends Thread {
      * @throws IOException If there is a communication failure
      */
     private void receiveState() throws IOException {
-        final int numActors = server.receiveHeaders(clientNames);
+        int numActors = server.receiveHeaders(clientNames);
         for (int i = 0; i < numActors; i++) {
-            final int actorID = server.receiveActor(actorBuffer, i);
+            int actorID = server.receiveActor(actorBuffer, i);
             if (currentActors.containsKey(actorID)) {
                 currentActors.get(actorID).updateFromStream(actorBuffer);
                 nextActors.put(actorID, currentActors.get(actorID));
             } else {
-                final ActorType type = server.getActorType(i);
+                ActorType type = server.getActorType(i);
                 nextActors.put(actorID, Actor.fromBuffer(type, actorID, actorBuffer));
             }
         }
@@ -120,7 +120,7 @@ public class Client extends Thread {
      */
     private void updateDisplay() {
         display.loadActors(nextActors.values());
-        final Map<Integer, Actor> temp = currentActors;
+        Map<Integer, Actor> temp = currentActors;
 
         // Flip the actor buffers
         currentActors = nextActors;

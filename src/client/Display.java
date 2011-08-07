@@ -37,7 +37,7 @@ class Display extends Canvas {
      * @param listener The input handler that the client is using
      * @param size the size of the game
      */
-    Display(final Dimension size, final KeyListener listener) {
+    Display(Dimension size, KeyListener listener) {
         super();
         actors = new LinkedList<Actor>();
         serverNames = new ArrayList<String>(Game.APPSIZE.height / VERT_TEXT_INCR);
@@ -48,7 +48,7 @@ class Display extends Canvas {
         offscreen = new BufferedImage(size.width, size.height,
                 BufferedImage.TYPE_INT_ARGB);
         offgraphics = offscreen.createGraphics();
-        final JFrame frame = new JFrame(APPNAME);
+        JFrame frame = new JFrame(APPNAME);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(Game.APPSIZE);
         frame.setResizable(false);
@@ -72,7 +72,7 @@ class Display extends Canvas {
      * Render the game.
      * @param graphics the Graphics object to draw on
      */
-    public void paint(final Graphics graphics) {
+    public void paint(Graphics graphics) {
         update(graphics);
     }
 
@@ -80,7 +80,7 @@ class Display extends Canvas {
      * Render the game.
      * @param graphics the Graphics object to draw on
      */
-    public void update(final Graphics graphics) {
+    public void update(Graphics graphics) {
         // Clear the offscreen image
         offgraphics.setColor(Color.BLACK);
         offgraphics.fillRect(0, 0, getSize().width, getSize().height);
@@ -95,7 +95,7 @@ class Display extends Canvas {
             offgraphics.setColor(Color.RED);
             int i = 0;
             for (i = 0; i < serverNames.size(); i++) {
-                final Color color = (i == currentServer) ? Color.RED : Color.WHITE;
+                Color color = (i == currentServer) ? Color.RED : Color.WHITE;
                 offgraphics.setPaint(color);
                 offgraphics.drawString(serverNames.get(i), Game.APPSIZE.width - 100, 20 * i + 10);
             }

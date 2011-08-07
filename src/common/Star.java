@@ -55,7 +55,7 @@ public class Star extends Actor  {
      */
     @Override
     public void destroy() {
-        return;
+        // Stars are invincible
     }
 
     /**
@@ -64,7 +64,7 @@ public class Star extends Actor  {
      */
     @Override
     public void damage(int damageTaken) {
-        return;
+        // Stars are invincible
     }
 
     /**

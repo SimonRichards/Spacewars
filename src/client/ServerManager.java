@@ -41,10 +41,10 @@ class ServerManager extends Thread {
      * @param clientID The client's ID
      * @throws IOException if the UDP or TCP connections fail
      */
-    ServerManager(final int port, final int clientID) throws IOException {
+    ServerManager(int port, int clientID) throws IOException {
         super();
         serverCounter = new HashMap<String, Integer>(Game.MAX_SERVERS, 1.0f);
-        final String name = getServerName(LOCAL_SERVER_NAME);
+        String name = getServerName(LOCAL_SERVER_NAME);
         servers = new CopyOnWriteArrayList<Server>(); // Mutations are rare, access isn't
         servers.add(new Server(InetAddress.getLocalHost(), port, name, clientID));
         multiSocket = new MulticastSocket(Game.DEFAULT_UDP_PORT);
@@ -123,7 +123,7 @@ class ServerManager extends Thread {
             return false;
         } else {
             servers.get(current).leave();
-            final int temp = current;
+            int temp = current;
             do {
                 current = Game.rand.nextInt(servers.size());
             } while (current == temp);
@@ -215,7 +215,7 @@ class ServerManager extends Thread {
      * @param address The server's address
      * @return A unique name for the server
      */
-    private String getServerName(final String name) {
+    private String getServerName(String name) {
         if (serverCounter.containsKey(name)) {
             serverCounter.put(name, serverCounter.get(name) + 1);
         } else {

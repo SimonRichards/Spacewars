@@ -36,9 +36,9 @@ public class Game {
      * go into headless (no client) mode.
      * @param args
      */
-    public static void main(final String[] args) {
-        final int tcpPort = new Random().nextInt(MAX_PORT - MIN_PORT) + MIN_PORT;
-        final boolean headless = System.getenv().containsKey("HEADLESS") || args.length > 0;
+    public static void main(String[] args) {
+        int tcpPort = new Random().nextInt(MAX_PORT - MIN_PORT) + MIN_PORT;
+        boolean headless = System.getenv().containsKey("HEADLESS") || args.length > 0;
 
         try {
             Server.start(tcpPort, headless);
