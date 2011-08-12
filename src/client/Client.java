@@ -55,10 +55,15 @@ public class Client extends Thread {
     public void run() {
         serverManager.start();
         server = serverManager.getCurrent();
+        Server lastServer = server;
         while (true) {
             try {
                 handleCommands(input.read());
                 server = serverManager.getCurrent();
+                if (server != lastServer) {
+                    currentActors.clear();
+                }
+                lastServer = server;
                 receiveState();
                 updateDisplay();
             } catch (IOException e) {
@@ -97,7 +102,12 @@ public class Client extends Thread {
 
     /**
      * Retrieves headers and actor streams from the connection to
-     * the current server
+     * the current server.
+     *
+     * The actors already isntantiated are stored in a double
+     * buffered hashmap with the actor object mapped to it's
+     * unique id. If an incoming actor does not match an
+     * existing one then it is instantiated.
      * @throws IOException If there is a communication failure
      */
     private void receiveState() throws IOException {
