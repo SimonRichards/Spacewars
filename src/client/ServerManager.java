@@ -167,8 +167,14 @@ class ServerManager extends Thread {
                 multiSocket.receive(packet);
 
                 // Decode the datagram
-                data = new String(packet.getData()).split(" ");
-                port = Integer.valueOf(data[0]);
+                try {
+                    data = new String(packet.getData()).split(" ");
+                    port = Integer.valueOf(data[0]);
+                } catch (NumberFormatException e) {
+                    // Karl is spamming me again
+                    System.out.println("Invalid datagram received");
+                    continue;
+                }
 
                 // Search for matching server and refresh its timeout counter
                 // if found
@@ -184,17 +190,17 @@ class ServerManager extends Thread {
                 if (!found) {
                     name = getServerName(
                             packet.getAddress().getHostAddress().equals(
-                            InetAddress.getLocalHost().getHostAddress()) ?
-                            LOCAL_SERVER_NAME :
-                            data[1].trim() + "'s");
+                            InetAddress.getLocalHost().getHostAddress())
+                            ? LOCAL_SERVER_NAME
+                            : data[1].trim() + "'s");
                     if (servers.size() < Game.MAX_SERVERS) {
                         servers.add(new Server(
                                 packet.getAddress(),
                                 port,
                                 name,
                                 clientID));
+                        names.add(name);
                     }
-                    names.add(name);
                 }
 
                 // Clear the buffer
@@ -209,7 +215,6 @@ class ServerManager extends Thread {
             System.exit(-1);
         }
     }
-
 
     /**
      * @param address The server's address
