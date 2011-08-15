@@ -1,0 +1,11 @@
+Call ant (without arguments to compile)
+ant run to run a copy of the project
+java -jar dist/spacewars.jar to run the precompiled version
+
+Controls:
+A - Rotate CCW
+D - Rotate CW
+W - Accelerate
+Q - Hyperspace to random server
+R - Respawn (if dead)
+Space - Fire a missile

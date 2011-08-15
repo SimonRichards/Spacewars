@@ -8,7 +8,8 @@ import java.util.EnumSet;
 import javax.vecmath.Vector2d;
 
 /**
- * Unfinished
+ * An AI is a Needle spacecraft with the ability to return its own, intelligent command
+ * set through the update method.
  * @author Simon, Daniel
  */
 public class AI extends Spacecraft.Needle {
